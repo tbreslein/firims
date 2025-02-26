@@ -60,7 +60,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
         self.len
     }
 
-    /// Checks whether there are any elements present in the set.
+    /// Checks whether the set is empty.
     ///
     /// ```
     /// use firms::BitSet;
