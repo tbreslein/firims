@@ -214,10 +214,15 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     }
 
     pub fn iter(&self) -> Iter<'_, LOWER, UPPER, T> {
-        Iter {
-            set: self,
-            index: 0,
-        }
+        Iter::new(self)
+    }
+
+    pub fn into_iter(&self) -> IntoIter<LOWER, UPPER, T> {
+        IntoIter::new(self)
+    }
+
+    pub fn drain(&self) -> Drain<'_, LOWER, UPPER, T> {
+        Drain::new(self)
     }
 
     /// Visits the values representing the difference, i.e., the values that are in self but not in other.
@@ -334,7 +339,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> FromIterator<T>
 
 impl<const LOWER: usize, const UPPER: usize, T> IntoIterator for BitSet<LOWER, UPPER, T> {
     type Item = T;
-    type IntoIter = IntoIter<T>;
+    type IntoIter = IntoIter<LOWER, UPPER, T>;
     fn into_iter(self) -> Self::IntoIter {
         todo!()
     }
@@ -342,7 +347,7 @@ impl<const LOWER: usize, const UPPER: usize, T> IntoIterator for BitSet<LOWER, U
 
 impl<const LOWER: usize, const UPPER: usize, T> IntoIterator for &BitSet<LOWER, UPPER, T> {
     type Item = T;
-    type IntoIter = IntoIter<T>;
+    type IntoIter = IntoIter<LOWER, UPPER, T>;
     fn into_iter(self) -> Self::IntoIter {
         todo!()
     }
@@ -381,27 +386,78 @@ pub struct Difference {}
 pub struct SymmetricDifference {}
 pub struct Intersection {}
 pub struct Union {}
-pub struct IntoIter<T> {
-    phantom: PhantomData<T>,
-}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Iter<'a, const LOWER: usize, const UPPER: usize, T> {
-    set: &'a BitSet<LOWER, UPPER, T>,
     index: usize,
+    collection: &'a BitSet<LOWER, UPPER, T>,
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T> Iterator for Iter<'a, LOWER, UPPER, T> {
-    type Item = usize;
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.index < self.set.len {
-            self.index += 1;
-            Some(self.index + LOWER)
-        } else {
-            None
+impl<'a, const LOWER: usize, const UPPER: usize, T> Iter<'a, LOWER, UPPER, T> {
+    fn new(collection: &'a BitSet<LOWER, UPPER, T>) -> Self {
+        Self {
+            index: 0,
+            collection,
         }
     }
 }
 
-impl<T> Iterator for IntoIter<T> {
+impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
+    for Iter<'a, LOWER, UPPER, T>
+{
+    type Item = usize;
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!()
+        //let idx = self.index;
+        //let v =
+        //if idx < self.collection.len && self.collection.contains(idx + LOWER) {
+        //    self.index += 1;
+        //    Some(idx + LOWER)
+        //} else {
+        //    None
+        //}
+    }
+}
+
+pub struct Drain<'a, const LOWER: usize, const UPPER: usize, T> {
+    index: usize,
+    collection: &'a BitSet<LOWER, UPPER, T>,
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, T> Drain<'a, LOWER, UPPER, T> {
+    fn new(collection: &'a BitSet<LOWER, UPPER, T>) -> Self {
+        Self {
+            index: 0,
+            collection,
+        }
+    }
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, T> Iterator for Drain<'a, LOWER, UPPER, T> {
+    type Item = usize;
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!()
+        //if self.index < self.collection.len {
+        //    let v = self.index + LOWER;
+        //    self.index += 1;
+        //    Some(v)
+        //} else {
+        //    None
+        //}
+    }
+}
+
+pub struct IntoIter<const LOWER: usize, const UPPER: usize, T> {
+    phantom: PhantomData<T>,
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, T> IntoIter<LOWER, UPPER, T> {
+    fn new(_collection: &'a BitSet<LOWER, UPPER, T>) -> Self {
+        todo!()
+    }
+}
+
+impl<const LOWER: usize, const UPPER: usize, T> Iterator for IntoIter<LOWER, UPPER, T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         todo!()
