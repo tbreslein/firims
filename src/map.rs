@@ -518,10 +518,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (
-            self.inner.collection.len,
-            Some(self.inner.collection.data.len()),
-        )
+        (self.inner.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -562,10 +559,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (
-            self.inner.collection.len,
-            Some(self.inner.collection.data.len()),
-        )
+        (self.inner.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -606,10 +600,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (
-            self.inner.collection.len,
-            Some(self.inner.collection.data.len()),
-        )
+        (self.inner.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -651,10 +642,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (
-            self.inner.collection.len,
-            Some(self.inner.collection.data.len()),
-        )
+        (self.inner.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -695,10 +683,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (
-            self.inner.collection.len,
-            Some(self.inner.collection.data.len()),
-        )
+        (self.inner.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -751,7 +736,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.collection.len, Some(self.collection.data.len()))
+        (self.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -798,7 +783,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.collection.len, Some(self.collection.data.len()))
+        (self.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -849,7 +834,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.collection.len, Some(self.collection.data.len()))
+        (self.collection.len, Some(UPPER - LOWER))
     }
 }
 
@@ -899,7 +884,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.collection.len, Some(self.collection.data.len()))
+        (self.collection.len, Some(UPPER - LOWER))
     }
 }
 
