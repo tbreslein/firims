@@ -1,6 +1,22 @@
 [package]
-name = "firms"
+name = "firims"
 version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+description = "fixed range integer maps and sets"
+readme = "README.md"
+exclude = [ "./bench_results/*" ]
 
 [dependencies]
+
+[lib]
+bench = false
+
+[[bench]]
+name = "bench"
+harness = false
+
+[dev-dependencies]
+criterion = "0.5.1"
+integer-hasher = "0.1.1"
+rand = "0.9.0"

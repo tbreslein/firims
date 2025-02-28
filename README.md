@@ -1,29 +1,42 @@
-# Fibis
+# firims
 
-FIxed size BIt Set.
+FIxed Range Integer Maps and Sets
 
 ## Disclaimer
 
-A lot of utility methods and trait implementations have not been implemented yet!
-Also, the data structure is currently limited to elements of type `usize`. This
-limitation will be lifted in the future, currently this crate is mostly a proof
-of concept in order to see benchmark results.
+The key type of the data structure is currently limited to elements of type
+`usize`. This limitation may be lifted in the future.
 
 ## General
 
-This crate implements a bit set (currently limited to `usize` elements) for
-fixed lower and upper boundaries for your set. I.e., if you create a bit set
-with boundaries `10` and `200`, then you can only insert elements in between
-those two numbers into the set.
+This crate implements a maps and sets for integer keys of a known range. For
+example, if you need a map with integer keys, and you know those keys can only
+ever be numbers between 10 and 200.
 
 While this is a major limitation, whenever you can set constraints like this you
 unlock a lot of performance gains, because you don't need to hash numbers.
-Instead, you just track booleans (or in this case bits) telling you whether the
-number is in the set or not.
+Instead, in case of the bitset, you just track booleans (or in this case bits)
+telling you whether the number is in the set or not.
 
 The implementation for this type of data structure is fairly simple, so you
 should be able to easily adapt this implementation to suit your own needs; just
 remember to honor the MIT license.
+
+## Implementation details
+
+The two data structures, the `firims::Map` and the `firims::BitSet` have very
+simple implementations. The former is just a `Vec<V>`, where `V` is your value
+type, and it maps keys to indexes in the `Vec` through a simple addition. As
+simple as that may be, the benefit of the `firims::Map` is that it implements
+most of the of the same interface of the `std::collections::HashMap`, making
+this a good drop-in replacement for most use cases (given that the
+`firims::Map` constraints fir you use case).
+
+The `firims::BitSet` is, well, a bit set. Each key is mapped to a bit in an
+element in a `Vec<u64>`, and a value being present just means that the bit is
+set to 1. Again, very simple implementation, pretty easy to replicate, but it
+implements the majority of the `std::collections::HashSet` interface in order to
+make the bitset a drop-in replacement.
 
 ## Benchmarks
 
@@ -34,7 +47,7 @@ following operations:
 - insertions
 - `.contains()` checks
 
-The benchmarks compares the the `fibis::BitSet` with an `IntSet` from the
+The benchmarks compares the the `firims::BitSet` with an `IntSet` from the
 `integer_hasher` crate. The benchmarks have been run on two different machines:
 An M2 macbook pro, as well as an `x86_64-linux` machine using a Ryzen 7 5800X CPU.
 
@@ -148,7 +161,7 @@ test contains BitSet 1000000 ... bench:      281744 ns/iter (+/- 13323)
 
 > MIT License
 >
-> Copyright (c) 2024-2025 Tommy Breslein
+> Copyright (c) 2025 Tommy Breslein
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal

@@ -36,7 +36,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// a type implementing the [Integer] trait
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     /// let foo = BitSet::<10, 20, usize>::new();
     /// ```
     pub fn new() -> Self {
@@ -46,7 +46,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Returns the number of elements in the set.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1, 10, 5]);
     /// assert_eq!(foo.len(), 3);
@@ -65,7 +65,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Checks whether the set is empty.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1]);
     /// assert_eq!(foo.len(), 1);
@@ -81,7 +81,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Removes all items from set.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1, 10, 5]);
     /// assert_eq!(foo.len(), 3);
@@ -115,7 +115,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Return whether an item is part of the set.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<3, 32, usize>::from([3, 10, 5]);
     ///
@@ -138,7 +138,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// This item `x` has to be constrained to `LOWER <= x <= UPPER`
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::new();
     /// foo.insert(0);
@@ -157,8 +157,8 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// assert!(!foo.contains(32));
     /// ```
     pub fn insert(&mut self, x: T) {
-        assert!(x >= LOWER);
-        assert!(x <= UPPER);
+        debug_assert!(x >= LOWER);
+        debug_assert!(x <= UPPER);
         let (idx, bit) = Self::position(x);
         self.len += Into::<usize>::into(!self.is_bit_set(idx, bit));
         self.data[idx] |= 1 << bit;
@@ -167,7 +167,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Removes an item from the set.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1]);
     /// assert!(foo.contains(1));
@@ -185,7 +185,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// it only retains elements fulfilling the predicate.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1, 2, 3]);
     ///
@@ -207,7 +207,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// given one.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1, 2, 3]);
     ///
@@ -229,7 +229,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// An iterator visiting all values of the set in ascending order.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
     ///
@@ -246,7 +246,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// A consuming iterator visiting all values of the set in ascending order.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
     ///
@@ -264,7 +264,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// each iteration removing that value from the set.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
     ///
@@ -286,7 +286,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// in self but not in other.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let foo = BitSet::<1, 10, usize>::from([1, 2, 3]);
     /// let bar = BitSet::<1, 10, usize>::from([4, 2, 3, 4]);
@@ -307,7 +307,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// values that are in self or in other but not in both.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let foo = BitSet::<1, 10, usize>::from([1, 2, 3]);
     /// let bar = BitSet::<1, 10, usize>::from([4, 2, 3, 4]);
@@ -334,7 +334,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// copies of [T] in the two sets.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let foo = BitSet::<1, 10, usize>::from([1, 2, 3]);
     /// let bar = BitSet::<1, 10, usize>::from([4, 2, 3, 4]);
@@ -349,7 +349,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Visits the values representing the union, i.e., all the values in self or other, without duplicates.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let foo = BitSet::<1, 10, usize>::from([1, 2, 3]);
     /// let bar = BitSet::<1, 10, usize>::from([4, 2, 3, 4]);
@@ -364,7 +364,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Returns true of `self` and `other` do not share any elements.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1, 2, 3]);
     /// let mut bar = BitSet::<0, 32, usize>::from([4, 5, 6]);
@@ -382,7 +382,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// least all the values in self.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let foo = BitSet::<0, 5, usize>::from([1, 2, 3]);
     /// let mut bar = BitSet::<0, 5, usize>::new();
@@ -405,7 +405,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// least all the values in other.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let foo = BitSet::<0, 5, usize>::from([1, 2]);
     /// let mut bar = BitSet::<0, 5, usize>::new();
@@ -433,7 +433,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitAnd<&BitSet<LOWER, U
     /// [BitSet<LOWER, UPPER, T>].
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let a = BitSet::<1, 6, usize>::from([1, 2, 3]);
     /// let b = BitSet::<1, 6, usize>::from([2, 3, 4]);
@@ -462,7 +462,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitOr<&BitSet<LOWER, UP
     /// [BitSet<LOWER, UPPER, T>].
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let a = BitSet::<1, 6, usize>::from([1, 2, 3]);
     /// let b = BitSet::<1, 6, usize>::from([3, 4, 5]);
@@ -491,7 +491,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitXor<&BitSet<LOWER, U
     /// [BitSet<LOWER, UPPER, T>].
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let a = BitSet::<1, 6, usize>::from([1, 2, 3]);
     /// let b = BitSet::<1, 6, usize>::from([3, 4, 5]);
@@ -515,7 +515,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Extend<T> for BitSet<LO
     /// Extends a [BitSet<LOWER, UPPER, T>] with the contents of an iterator.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut a = BitSet::<1, 6, usize>::from([1, 2, 3]);
     /// a.extend([3, 4, 5]);
@@ -553,9 +553,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> FromIterator<T>
 {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut s = Self::new();
-        for x in iter {
-            s.insert(x);
-        }
+        s.extend(iter);
         s
     }
 }
@@ -565,9 +563,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> FromIterator<&'a T>
 {
     fn from_iter<I: IntoIterator<Item = &'a T>>(iter: I) -> Self {
         let mut s = Self::new();
-        for x in iter {
-            s.insert(*x);
-        }
+        s.extend(iter);
         s
     }
 }
@@ -596,25 +592,17 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer + PartialEq> PartialEq
     /// Compares two [BitSet]s.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let a = BitSet::<1, 6, usize>::from([1, 2, 3]);
     /// let b = BitSet::<1, 6, usize>::from([2, 3]);
     /// let c = BitSet::<1, 6, usize>::from([1, 2, 3]);
     ///
-    /// assert_neq!(a, b);
-    /// assert_eq!(a, c);
+    /// assert!(a != b);
+    /// assert!(a == c);
     /// ```
     fn eq(&self, other: &Self) -> bool {
-        if self.len != other.len {
-            return false;
-        }
-        for (x, y) in self.iter().zip(other) {
-            if x != y {
-                return false;
-            }
-        }
-        true
+        self.len == other.len && self.iter().zip(other).all(|(x, y)| x == y)
     }
 }
 
@@ -629,7 +617,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Sub for &BitSet<LOWER, 
     /// the exact same.
     ///
     /// ```
-    /// use firms::BitSet;
+    /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<2, 5, usize>::new();
     /// foo.insert(2);
@@ -645,10 +633,10 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Sub for &BitSet<LOWER, 
     /// assert_eq!(bar.len(), 2);
     /// assert_eq!(baz.len(), 2);
     ///
-    /// //assert_eq!(baz.contains(2), true);
-    /// //assert_eq!(baz.contains(3), false);
-    /// //assert_eq!(baz.contains(4), false);
-    /// //assert_eq!(baz.contains(5), true);
+    /// assert_eq!(baz.contains(2), true);
+    /// assert_eq!(baz.contains(3), false);
+    /// assert_eq!(baz.contains(4), false);
+    /// assert_eq!(baz.contains(5), true);
     /// ```
     fn sub(self, rhs: &BitSet<LOWER, UPPER, T>) -> Self::Output {
         self.difference(rhs).collect()
@@ -679,23 +667,43 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Difference<'a, LOWE
     }
 }
 
+fn generic_next_binop<
+    const LOWER: usize,
+    const UPPER: usize,
+    T: Integer,
+    F: Fn(bool, bool) -> bool,
+>(
+    index: &mut usize,
+    lhs: &BitSet<LOWER, UPPER, T>,
+    rhs: &BitSet<LOWER, UPPER, T>,
+    op: F,
+) -> Option<T> {
+    while *index <= UPPER {
+        let v = Into::into(*index);
+        *index += 1;
+        if op(lhs.contains(v), rhs.contains(v)) {
+            return Some(v);
+        }
+    }
+    None
+}
+
+fn generic_size_hint_binop<const LOWER: usize, const UPPER: usize, T: Integer>(
+    lhs: &BitSet<LOWER, UPPER, T>,
+    rhs: &BitSet<LOWER, UPPER, T>,
+) -> (usize, Option<usize>) {
+    (lhs.len.min(rhs.len), Some(UPPER - LOWER))
+}
+
 impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
     for Difference<'a, LOWER, UPPER, T>
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        while self.index <= UPPER {
-            let v = self.index.into();
-            self.index += 1;
-            if self.lhs.contains(v) && !self.rhs.contains(v) {
-                return Some(v);
-            }
-        }
-        None
+        generic_next_binop(&mut self.index, self.lhs, self.rhs, |x, y| x && !y)
     }
-
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.lhs.len.min(self.rhs.len), Some(UPPER - LOWER))
+        generic_size_hint_binop(self.lhs, self.rhs)
     }
 }
 
@@ -725,18 +733,10 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        while self.index <= UPPER {
-            let v = self.index.into();
-            self.index += 1;
-            if self.lhs.contains(v) ^ self.rhs.contains(v) {
-                return Some(v);
-            }
-        }
-        None
+        generic_next_binop(&mut self.index, self.lhs, self.rhs, |x, y| x ^ y)
     }
-
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.lhs.len.min(self.rhs.len), Some(UPPER - LOWER))
+        generic_size_hint_binop(self.lhs, self.rhs)
     }
 }
 
@@ -764,18 +764,10 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        while self.index <= UPPER {
-            let v = self.index.into();
-            self.index += 1;
-            if self.lhs.contains(v) && self.rhs.contains(v) {
-                return Some(v);
-            }
-        }
-        None
+        generic_next_binop(&mut self.index, self.lhs, self.rhs, |x, y| x && y)
     }
-
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.lhs.len.min(self.rhs.len), Some(UPPER - LOWER))
+        generic_size_hint_binop(self.lhs, self.rhs)
     }
 }
 
@@ -803,18 +795,10 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        while self.index <= UPPER {
-            let v = self.index.into();
-            self.index += 1;
-            if self.lhs.contains(v) || self.rhs.contains(v) {
-                return Some(v);
-            }
-        }
-        None
+        generic_next_binop(&mut self.index, self.lhs, self.rhs, |x, y| x || y)
     }
-
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.lhs.len.min(self.rhs.len), Some(UPPER - LOWER))
+        generic_size_hint_binop(self.lhs, self.rhs)
     }
 }
 

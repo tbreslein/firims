@@ -1,4 +1,4 @@
-.PHONY: all release build test
+.PHONY: all release build test bench
 
 all: release
 
@@ -10,3 +10,6 @@ build:
 
 test:
 	cargo test
+
+bench:
+	cargo bench -- --output-format=bencher

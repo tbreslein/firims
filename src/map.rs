@@ -28,7 +28,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// type for the values.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     /// let foo = Map::<10, 20, usize, f32>::new();
     /// ```
     pub fn new() -> Self {
@@ -38,7 +38,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns the number of elements in the map.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(1, 11.1);
@@ -58,7 +58,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Checks whether the map is empty.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(1, 11.1);
@@ -75,7 +75,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Removes all items from map.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(1, 11.1);
@@ -106,7 +106,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Return whether a key is present in the map.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<3, 32, usize, f32>::new();
     /// foo.insert(3, 11.1);
@@ -132,7 +132,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// This item `x` has to be constrained to `LOWER <= x <= UPPER`
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -220,7 +220,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// An iterator visiting all keys in ascending order.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -240,7 +240,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// A consuming iterator visiting all keys in ascending order.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -260,7 +260,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// An iterator visiting all values in order of ascending keys.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -281,7 +281,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// mutable references.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -301,7 +301,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// A consuming iterator visiting all values in order of ascending order.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -321,7 +321,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// An iterator vising all key-value pairs in order of ascending keys.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -342,7 +342,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// returning mutable references to those values.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -363,7 +363,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// keys.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -384,7 +384,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// keys.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     ///
     /// let mut foo = Map::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
@@ -424,7 +424,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns a reference to the value corresponding to the key.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     /// let mut foo = Map::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
@@ -450,7 +450,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns a reference to the key-value pair corresponding to the key.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     /// let mut foo = Map::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
@@ -467,7 +467,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns a mutable reference to the value corresponding to the key.
     ///
     /// ```
-    /// use firms::Map;
+    /// use firims::Map;
     /// let mut foo = Map::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
