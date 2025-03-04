@@ -1,0 +1,101 @@
+cargo bench -- --output-format=bencher
+test construct IntSet 100 ... bench:         263 ns/iter (+/- 1)
+
+test construct firims::BitSet 100 ... bench:          75 ns/iter (+/- 0)
+
+test construct IntSet 1000 ... bench:        2541 ns/iter (+/- 7)
+
+test construct firims::BitSet 1000 ... bench:         681 ns/iter (+/- 2)
+
+test construct IntSet 10000 ... bench:       23419 ns/iter (+/- 24)
+
+test construct firims::BitSet 10000 ... bench:        6622 ns/iter (+/- 17)
+
+test construct IntSet 100000 ... bench:      251295 ns/iter (+/- 743)
+
+test construct firims::BitSet 100000 ... bench:       66238 ns/iter (+/- 729)
+
+test construct IntSet 1000000 ... bench:     2335786 ns/iter (+/- 717)
+
+test construct firims::BitSet 1000000 ... bench:      721745 ns/iter (+/- 2580)
+
+test insert IntSet 100 ... bench:          83 ns/iter (+/- 0)
+
+test insert firims::BitSet 100 ... bench:          58 ns/iter (+/- 0)
+
+test insert IntMap 100 ... bench:          80 ns/iter (+/- 0)
+
+test insert firims::Map 100 ... bench:          30 ns/iter (+/- 0)
+
+test insert IntSet 1000 ... bench:         804 ns/iter (+/- 0)
+
+test insert firims::BitSet 1000 ... bench:         339 ns/iter (+/- 0)
+
+test insert IntMap 1000 ... bench:         761 ns/iter (+/- 0)
+
+test insert firims::Map 1000 ... bench:         297 ns/iter (+/- 6)
+
+test insert IntSet 10000 ... bench:        8114 ns/iter (+/- 16)
+
+test insert firims::BitSet 10000 ... bench:        2990 ns/iter (+/- 3)
+
+test insert IntMap 10000 ... bench:        8198 ns/iter (+/- 21)
+
+test insert firims::Map 10000 ... bench:        3231 ns/iter (+/- 12)
+
+test insert IntSet 100000 ... bench:      106878 ns/iter (+/- 43)
+
+test insert firims::BitSet 100000 ... bench:       26420 ns/iter (+/- 9)
+
+test insert IntMap 100000 ... bench:      121147 ns/iter (+/- 237)
+
+test insert firims::Map 100000 ... bench:       34430 ns/iter (+/- 433)
+
+test insert IntSet 1000000 ... bench:     1629813 ns/iter (+/- 24991)
+
+test insert firims::BitSet 1000000 ... bench:      348972 ns/iter (+/- 141)
+
+test insert IntMap 1000000 ... bench:     1778716 ns/iter (+/- 3995)
+
+test insert firims::Map 1000000 ... bench:      484658 ns/iter (+/- 4395)
+
+test contains intset 100 ... bench:          52 ns/iter (+/- 0)
+
+test contains BitSet 100 ... bench:          19 ns/iter (+/- 0)
+
+test contains IntMap 100 ... bench:         152 ns/iter (+/- 0)
+
+test contains firims::Map 100 ... bench:          16 ns/iter (+/- 0)
+
+test contains intset 1000 ... bench:         489 ns/iter (+/- 1)
+
+test contains BitSet 1000 ... bench:         196 ns/iter (+/- 0)
+
+test contains IntMap 1000 ... bench:        1503 ns/iter (+/- 15)
+
+test contains firims::Map 1000 ... bench:         171 ns/iter (+/- 3)
+
+test contains intset 10000 ... bench:        4973 ns/iter (+/- 9)
+
+test contains BitSet 10000 ... bench:        1922 ns/iter (+/- 0)
+
+test contains IntMap 10000 ... bench:       16344 ns/iter (+/- 8)
+
+test contains firims::Map 10000 ... bench:        2012 ns/iter (+/- 1)
+
+test contains intset 100000 ... bench:       67423 ns/iter (+/- 435)
+
+test contains BitSet 100000 ... bench:       19189 ns/iter (+/- 14)
+
+test contains IntMap 100000 ... bench:      640985 ns/iter (+/- 2716)
+
+test contains firims::Map 100000 ... bench:       27972 ns/iter (+/- 1034)
+
+test contains intset 1000000 ... bench:     1096985 ns/iter (+/- 33036)
+
+test contains BitSet 1000000 ... bench:      194224 ns/iter (+/- 855)
+
+test contains IntMap 1000000 ... bench:     8398847 ns/iter (+/- 63960)
+
+test contains firims::Map 1000000 ... bench:      357651 ns/iter (+/- 4274)
+
