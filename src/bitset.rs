@@ -241,21 +241,6 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
         Iter::new(self)
     }
 
-    /// A consuming iterator visiting all values of the set in ascending order.
-    ///
-    /// ```
-    /// use firims::BitSet;
-    ///
-    /// let mut foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
-    ///
-    /// let mut iter = foo.into_iter();
-    /// assert_eq!(iter.next(), Some(2));
-    /// assert_eq!(iter.next(), Some(4));
-    /// assert_eq!(iter.next(), Some(5));
-    /// assert_eq!(iter.next(), None);
-    /// ```
-    //pub fn into_iter(self) -> IntoIter<LOWER, UPPER, T> {}
-
     /// A draining iterator visiting all values of the set in ascending order,
     /// each iteration removing that value from the set.
     ///
@@ -705,8 +690,8 @@ fn generic_size_hint_binop<const LOWER: usize, const UPPER: usize, T: Integer>(
     (lhs.len.min(rhs.len), Some(UPPER - LOWER))
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
-    for Difference<'a, LOWER, UPPER, T>
+impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator
+    for Difference<'_, LOWER, UPPER, T>
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
@@ -738,8 +723,8 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer>
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
-    for SymmetricDifference<'a, LOWER, UPPER, T>
+impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator
+    for SymmetricDifference<'_, LOWER, UPPER, T>
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
@@ -769,8 +754,8 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Intersection<'a, LO
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
-    for Intersection<'a, LOWER, UPPER, T>
+impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator
+    for Intersection<'_, LOWER, UPPER, T>
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
@@ -800,9 +785,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Union<'a, LOWER, UP
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
-    for Union<'a, LOWER, UPPER, T>
-{
+impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for Union<'_, LOWER, UPPER, T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         generic_next_binop(&mut self.index, self.lhs, self.rhs, |x, y| x || y)
@@ -828,9 +811,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iter<'a, LOWER, UPP
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
-    for Iter<'a, LOWER, UPPER, T>
-{
+impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for Iter<'_, LOWER, UPPER, T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {
@@ -864,9 +845,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, T> Drain<'a, LOWER, UPPER, T> {
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
-    for Drain<'a, LOWER, UPPER, T>
-{
+impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for Drain<'_, LOWER, UPPER, T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {

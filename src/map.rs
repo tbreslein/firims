@@ -489,8 +489,8 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Keys<'a, LOWER, 
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
-    for Keys<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
+    for Keys<'_, LOWER, UPPER, K, V>
 {
     type Item = K;
     fn next(&mut self) -> Option<Self::Item> {
@@ -502,13 +502,13 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
-    for Keys<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
+    for Keys<'_, LOWER, UPPER, K, V>
 {
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
-    for Keys<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
+    for Keys<'_, LOWER, UPPER, K, V>
 {
 }
 
@@ -581,13 +581,13 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
-    for Values<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
+    for Values<'_, LOWER, UPPER, K, V>
 {
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
-    for Values<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
+    for Values<'_, LOWER, UPPER, K, V>
 {
 }
 
@@ -623,13 +623,13 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
-    for ValuesMut<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
+    for ValuesMut<'_, LOWER, UPPER, K, V>
 {
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
-    for ValuesMut<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
+    for ValuesMut<'_, LOWER, UPPER, K, V>
 {
 }
 
@@ -688,8 +688,8 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Drain<'a, LOWER,
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
-    for Drain<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
+    for Drain<'_, LOWER, UPPER, K, V>
 {
     type Item = (K, V);
     fn next(&mut self) -> Option<Self::Item> {
@@ -714,13 +714,13 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
-    for Drain<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
+    for Drain<'_, LOWER, UPPER, K, V>
 {
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
-    for Drain<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
+    for Drain<'_, LOWER, UPPER, K, V>
 {
 }
 
@@ -761,13 +761,13 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
-    for Iter<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
+    for Iter<'_, LOWER, UPPER, K, V>
 {
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
-    for Iter<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
+    for Iter<'_, LOWER, UPPER, K, V>
 {
 }
 
@@ -812,13 +812,13 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
     }
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
-    for IterMut<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
+    for IterMut<'_, LOWER, UPPER, K, V>
 {
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
-    for IterMut<'a, LOWER, UPPER, K, V>
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
+    for IterMut<'_, LOWER, UPPER, K, V>
 {
 }
 

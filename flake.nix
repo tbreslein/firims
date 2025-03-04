@@ -25,7 +25,7 @@
           buildInputs = [
             pkgs.openssl
             pkgs.pkg-config
-            (pkgs.rust-bin.stable."1.80.0".default.override {
+            (pkgs.rust-bin.stable.latest.default.override {
               extensions = [ "rust-src" "rust-analyzer" "rustfmt" ];
             })
           ];
