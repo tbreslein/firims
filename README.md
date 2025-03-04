@@ -89,6 +89,33 @@ x86 architecture, with the latter producing a way larger gap between the
 | `IntMap`           | 126 ns | 1,121 ns | 16,951 ns | 667,448 ns | 9,376,399 ns |
 | `firims::Map`      |  30 ns |   306 ns |  3,010 ns |  35,056 ns |   458,998 ns |
 
+### Ryzen7 9800X3D
+
+#### `IntSet` vs `firims::BitSet`
+
+| bench \ input size |    100 |    1,000 |    10,000 |    100,000 |    1,000,000 |
+| ------------------ | -----: | -------: | --------: | ---------: | -----------: |
+| **construction**   |    ... |      ... |       ... |        ... |          ... |
+| `IntSet`           | 263 ns | 2,541 ns | 23,419 ns | 251,295 ns | 2,335,786 ns |
+| `firims::BitSet`   |  75 ns |   681 ns |  6,622 ns |  66,238 ns |   721,745 ns |
+| **insertion**      |    ... |      ... |       ... |        ... |          ... |
+| `IntSet`           |  83 ns |   804 ns |  8,814 ns | 106,878 ns | 1,629,813 ns |
+| `firims::BitSet`   |  58 ns |   339 ns |  2,990 ns |  26,420 ns |   348,972 ns |
+| **contains**       |    ... |      ... |       ... |        ... |          ... |
+| `IntSet`           |  52 ns |   489 ns |  4,973 ns |  67,423 ns | 1,096,985 ns |
+| `firims::BitSet`   |  19 ns |   196 ns |  1,922 ns |  19,189 ns |   194,224 ns |
+
+#### `IntMap` vs `firims::Map`
+
+| bench \ input size |    100 |    1,000 |    10,000 |    100,000 |    1,000,000 |
+| ------------------ | -----: | -------: | --------: | ---------: | -----------: |
+| **insertion**      |    ... |      ... |       ... |        ... |          ... |
+| `IntMap`           |  80 ns |   761 ns |  8,198 ns | 121,147 ns | 1,778,716 ns |
+| `firims::Map`      |  30 ns |   297 ns |  3,231 ns |  34,430 ns |   484,658 ns |
+| **contains**       |    ... |      ... |       ... |        ... |          ... |
+| `IntMap`           | 152 ns | 1,503 ns | 16,344 ns | 640,985 ns | 8,398,847 ns |
+| `firims::Map`      |  16 ns |   171 ns |  2,012 ns |  27,972 ns |   357,651 ns |
+
 ## License
 
 > MIT License
