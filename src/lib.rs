@@ -73,7 +73,6 @@ mod tests {
         type T = u8;
         const LOWER: T = T::MAX / 2;
         const UPPER: T = clamp!(LOWER + 100, T::MIN, T::MAX);
-        assert!(LOWER < UPPER);
         run_test::<{ LOWER as usize }, { UPPER as usize }, T>();
     }
 
@@ -82,7 +81,6 @@ mod tests {
         type T = u16;
         const LOWER: T = T::MAX / 2;
         const UPPER: T = clamp!(LOWER + 10000, T::MIN, T::MAX);
-        assert!(LOWER < UPPER);
         run_test::<{ LOWER as usize }, { UPPER as usize }, T>();
     }
 
@@ -91,7 +89,6 @@ mod tests {
         type T = u32;
         const LOWER: T = T::MAX / 2;
         const UPPER: T = clamp!(LOWER + 10000000, T::MIN, T::MAX);
-        assert!(LOWER < UPPER);
         run_test::<{ LOWER as usize }, { UPPER as usize }, T>();
     }
 
@@ -100,7 +97,6 @@ mod tests {
         type T = u64;
         const LOWER: T = T::MAX / 2;
         const UPPER: T = clamp!(LOWER + 10000000, T::MIN, T::MAX);
-        assert!(LOWER < UPPER);
         run_test::<{ LOWER as usize }, { UPPER as usize }, T>();
     }
 
@@ -109,7 +105,6 @@ mod tests {
         type T = usize;
         const LOWER: usize = T::MAX / 2;
         const UPPER: usize = clamp!(LOWER + 10000000, T::MIN, T::MAX);
-        assert!(LOWER < UPPER);
         run_test::<LOWER, UPPER, T>();
     }
 }
