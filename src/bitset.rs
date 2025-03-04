@@ -254,9 +254,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// assert_eq!(iter.next(), Some(5));
     /// assert_eq!(iter.next(), None);
     /// ```
-    pub fn into_iter(self) -> IntoIter<LOWER, UPPER, T> {
-        IntoIter::new(self)
-    }
+    //pub fn into_iter(self) -> IntoIter<LOWER, UPPER, T> {}
 
     /// A draining iterator visiting all values of the set in ascending order,
     /// each iteration removing that value from the set.
@@ -569,6 +567,20 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> FromIterator<&'a T>
 impl<const LOWER: usize, const UPPER: usize, T: Integer> IntoIterator for BitSet<LOWER, UPPER, T> {
     type Item = T;
     type IntoIter = IntoIter<LOWER, UPPER, T>;
+
+    /// A consuming iterator visiting all values of the set in ascending order.
+    ///
+    /// ```
+    /// use firims::BitSet;
+    ///
+    /// let mut foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
+    ///
+    /// let mut iter = foo.into_iter();
+    /// assert_eq!(iter.next(), Some(2));
+    /// assert_eq!(iter.next(), Some(4));
+    /// assert_eq!(iter.next(), Some(5));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter::new(self)
     }
@@ -879,7 +891,7 @@ pub struct IntoIter<const LOWER: usize, const UPPER: usize, T: Integer> {
     collection: BitSet<LOWER, UPPER, T>,
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> IntoIter<LOWER, UPPER, T> {
+impl<const LOWER: usize, const UPPER: usize, T: Integer> IntoIter<LOWER, UPPER, T> {
     fn new(collection: BitSet<LOWER, UPPER, T>) -> Self {
         Self {
             index: LOWER,

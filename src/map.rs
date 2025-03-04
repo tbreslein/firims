@@ -363,27 +363,6 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
         IterMut::new(self)
     }
 
-    /// A consuming iterator vising all key-value pairs in order of ascending
-    /// keys.
-    ///
-    /// ```
-    /// use firims::Map;
-    ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
-    /// foo.insert(0, 11.1);
-    /// foo.insert(32, 33.3);
-    /// foo.insert(10, 22.2);
-    ///
-    /// let mut iter = foo.into_iter();
-    /// assert_eq!(iter.next(), Some((0, 11.1)));
-    /// assert_eq!(iter.next(), Some((10, 22.2)));
-    /// assert_eq!(iter.next(), Some((32, 33.3)));
-    /// assert_eq!(iter.next(), None);
-    /// ```
-    pub fn into_iter(self) -> IntoIter<LOWER, UPPER, K, V> {
-        IntoIter::new(self)
-    }
-
     /// A draining iterator vising all key-value pairs in order of ascending
     /// keys.
     ///
@@ -420,7 +399,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
             if self.data[i].is_some()
                 && f(
                     &NumCast::from(i + LOWER).unwrap(),
-                    &mut self.data[i].as_mut().unwrap(),
+                    self.data[i].as_mut().unwrap(),
                 )
             {
                 self.data[i] = None;
@@ -465,10 +444,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// assert_eq!(foo.get_key_value(20), None);
     /// ```
     pub fn get_key_value(&self, k: K) -> Option<(K, &V)> {
-        match self.get(k) {
-            Some(value) => Some((k, value)),
-            None => None,
-        }
+        self.get(k).map(|value| (k, value))
     }
 
     /// Returns a mutable reference to the value corresponding to the key.
@@ -518,10 +494,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
 {
     type Item = K;
     fn next(&mut self) -> Option<Self::Item> {
-        match self.inner.next() {
-            Some((k, _)) => Some(k),
-            None => None,
-        }
+        self.inner.next().map(|(k, _)| k)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -559,10 +532,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
 {
     type Item = K;
     fn next(&mut self) -> Option<Self::Item> {
-        match self.inner.next() {
-            Some((k, _)) => Some(k),
-            None => None,
-        }
+        self.inner.next().map(|(k, _)| k)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -683,10 +653,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
 {
     type Item = V;
     fn next(&mut self) -> Option<Self::Item> {
-        match self.inner.next() {
-            Some((_, v)) => Some(v),
-            None => None,
-        }
+        self.inner.next().map(|(_, v)| v)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -783,7 +750,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
             let idx = self.index;
             self.index += 1;
             if let Some(v) = &self.collection.data[idx] {
-                return Some((NumCast::from(idx + LOWER).unwrap(), &v));
+                return Some((NumCast::from(idx + LOWER).unwrap(), v));
             }
         }
         None
@@ -903,4 +870,32 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> ExactSizeIterator
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
     for IntoIter<LOWER, UPPER, K, V>
 {
+}
+
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoIterator
+    for Map<LOWER, UPPER, K, V>
+{
+    type Item = (K, V);
+    type IntoIter = IntoIter<LOWER, UPPER, K, V>;
+
+    /// A consuming iterator vising all key-value pairs in order of ascending
+    /// keys.
+    ///
+    /// ```
+    /// use firims::Map;
+    ///
+    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// foo.insert(0, 11.1);
+    /// foo.insert(32, 33.3);
+    /// foo.insert(10, 22.2);
+    ///
+    /// let mut iter = foo.into_iter();
+    /// assert_eq!(iter.next(), Some((0, 11.1)));
+    /// assert_eq!(iter.next(), Some((10, 22.2)));
+    /// assert_eq!(iter.next(), Some((32, 33.3)));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter::new(self)
+    }
 }
