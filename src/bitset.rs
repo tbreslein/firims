@@ -5,7 +5,9 @@ use std::{
     panic::{RefUnwindSafe, UnwindSafe},
 };
 
-use crate::{integer::Integer, BackingType};
+use num_traits::NumCast;
+
+use crate::{integer::Integer, BackingType, BIT_WIDTH};
 
 #[derive(Clone)]
 pub struct BitSet<const MIN: usize, const MAX: usize, T> {
@@ -23,7 +25,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Debug for BitSet<LOWER,
 impl<const LOWER: usize, const UPPER: usize, T: Integer> Default for BitSet<LOWER, UPPER, T> {
     fn default() -> Self {
         Self {
-            data: vec![0; (UPPER - LOWER).div_ceil(T::BIT_WIDTH) + 1],
+            data: vec![0; (UPPER - LOWER).div_ceil(BIT_WIDTH) + 1],
             len: 0,
             phantom: PhantomData::<T>,
         }
@@ -100,16 +102,10 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
         self.len = 0;
     }
 
-    const LOWER_DIV_BIT_WIDTH: usize = LOWER / T::BIT_WIDTH;
-    const LOWER_REM_BIT_WIDTH: usize = LOWER % T::BIT_WIDTH;
-
     /// Returns the array index and bit position for an element x.
     fn position(x: T) -> (usize, usize) {
-        let x: usize = x.into();
-        (
-            x / T::BIT_WIDTH - Self::LOWER_DIV_BIT_WIDTH,
-            x % T::BIT_WIDTH - Self::LOWER_REM_BIT_WIDTH,
-        )
+        let y: usize = <usize as NumCast>::from(x).unwrap() - LOWER;
+        (y / BIT_WIDTH, y % BIT_WIDTH)
     }
 
     /// Return whether an item is part of the set.
@@ -157,8 +153,9 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// assert!(!foo.contains(32));
     /// ```
     pub fn insert(&mut self, x: T) {
-        debug_assert!(x >= LOWER);
-        debug_assert!(x <= UPPER);
+        debug_assert!(x >= NumCast::from(LOWER).unwrap());
+        debug_assert!(x <= NumCast::from(UPPER).unwrap());
+
         let (idx, bit) = Self::position(x);
         self.len += Into::<usize>::into(!self.is_bit_set(idx, bit));
         self.data[idx] |= 1 << bit;
@@ -195,10 +192,11 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// assert!(!foo.contains(1));
     /// assert!(!foo.contains(3));
     /// ```
-    pub fn retain(&mut self, f: impl Fn(usize) -> bool) {
+    pub fn retain(&mut self, f: impl Fn(T) -> bool) {
         for x in LOWER..=UPPER {
+            let x = NumCast::from(x).unwrap();
             if !f(x) {
-                self.remove(x.into());
+                self.remove(x);
             }
         }
     }
@@ -679,7 +677,7 @@ fn generic_next_binop<
     op: F,
 ) -> Option<T> {
     while *index <= UPPER {
-        let v = Into::into(*index);
+        let v = NumCast::from(*index).unwrap();
         *index += 1;
         if op(lhs.contains(v), rhs.contains(v)) {
             return Some(v);
@@ -824,7 +822,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {
-            let v = self.index.into();
+            let v = NumCast::from(self.index).unwrap();
             self.index += 1;
             if self.collection.contains(v) {
                 return Some(v);
@@ -860,7 +858,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Iterator
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {
-            let v = self.index.into();
+            let v = NumCast::from(self.index).unwrap();
             self.index += 1;
             if self.collection.contains(v) {
                 self.collection.remove(v);
@@ -894,7 +892,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for IntoIter<L
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {
-            let v = self.index.into();
+            let v = NumCast::from(self.index).unwrap();
             self.index += 1;
             if self.collection.contains(v) {
                 self.collection.remove(v);

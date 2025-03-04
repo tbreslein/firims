@@ -1,5 +1,7 @@
 use std::{iter::FusedIterator, marker::PhantomData};
 
+use num_traits::NumCast;
+
 use crate::Integer;
 
 #[derive(Debug, Clone)]
@@ -100,7 +102,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
 
     /// Returns the array index for an element x.
     fn position(x: K) -> usize {
-        Into::<usize>::into(x) - LOWER
+        <usize as NumCast>::from(x).unwrap() - LOWER
     }
 
     /// Return whether a key is present in the map.
@@ -119,7 +121,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// assert!(foo.contains_key(5));
     /// ```
     pub fn contains_key(&self, x: K) -> bool {
-        x >= LOWER && x <= UPPER && self.data[Self::position(x)].is_some()
+        x >= NumCast::from(LOWER).unwrap()
+            && x <= NumCast::from(UPPER).unwrap()
+            && self.data[Self::position(x)].is_some()
     }
 
     /// Insert a key value pair into the map.
@@ -151,14 +155,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// assert!(!foo.contains_key(32));
     /// ```
     pub fn insert(&mut self, k: K, v: V) -> Option<V> {
-        assert!(
-            k >= LOWER,
+        debug_assert!(
+            k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried inserting at key={:#?}, but lower bound is set to {}",
             k,
             LOWER
         );
-        assert!(
-            k <= UPPER,
+        debug_assert!(
+            k <= NumCast::from(UPPER).unwrap(),
             "Out of bounds: Tried inserting at key={:#?}, but upper bound is set to {}",
             k,
             UPPER
@@ -174,14 +178,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Removes a key from the map, returning the value at the key if the key
     /// was previously in the map.
     pub fn remove(&mut self, k: K) -> Option<V> {
-        assert!(
-            k >= LOWER,
+        debug_assert!(
+            k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried removing at key={:#?}, but lower bound is set to {}",
             k,
             LOWER
         );
-        assert!(
-            k <= UPPER,
+        debug_assert!(
+            k <= NumCast::from(UPPER).unwrap(),
             "Out of bounds: Tried removing at key={:#?}, but upper bound is set to {}",
             k,
             UPPER
@@ -197,14 +201,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Removes a key from the map, returning the stored key and value if the
     /// key was previously in the map.
     pub fn remove_entry(&mut self, k: K) -> Option<(K, V)> {
-        assert!(
-            k >= LOWER,
+        debug_assert!(
+            k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried removing at key={:#?}, but lower bound is set to {}",
             k,
             LOWER
         );
-        assert!(
-            k <= UPPER,
+        debug_assert!(
+            k <= NumCast::from(UPPER).unwrap(),
             "Out of bounds: Tried removing at key={:#?}, but upper bound is set to {}",
             k,
             UPPER
@@ -414,7 +418,10 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     {
         for i in 0..self.len() {
             if self.data[i].is_some()
-                && f(&From::from(i + LOWER), &mut self.data[i].as_mut().unwrap())
+                && f(
+                    &NumCast::from(i + LOWER).unwrap(),
+                    &mut self.data[i].as_mut().unwrap(),
+                )
             {
                 self.data[i] = None;
             }
@@ -432,14 +439,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// assert_eq!(foo.get(20), None);
     /// ```
     pub fn get(&self, k: K) -> Option<&V> {
-        assert!(
-            k >= LOWER,
+        debug_assert!(
+            k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried retrieving at key={:#?}, but lower bound is set to {}",
             k,
             LOWER
         );
-        assert!(
-            k <= UPPER,
+        debug_assert!(
+            k <= NumCast::from(UPPER).unwrap(),
             "Out of bounds: Tried retrieving at key={:#?}, but upper bound is set to {}",
             k,
             UPPER
@@ -475,14 +482,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// assert_eq!(foo.get(20), None);
     /// ```
     pub fn get_mut(&mut self, k: K) -> Option<&mut V> {
-        assert!(
-            k >= LOWER,
+        debug_assert!(
+            k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried retrieving at key={:#?}, but lower bound is set to {}",
             k,
             LOWER
         );
-        assert!(
-            k <= UPPER,
+        debug_assert!(
+            k <= NumCast::from(UPPER).unwrap(),
             "Out of bounds: Tried retrieving at key={:#?}, but upper bound is set to {}",
             k,
             UPPER
@@ -726,7 +733,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
                 self.collection.len -= 1;
                 unsafe {
                     return Some((
-                        Into::<K>::into(idx + LOWER),
+                        NumCast::from(idx + LOWER).unwrap(),
                         self.collection.data[idx].take().unwrap_unchecked(),
                     ));
                 }
@@ -776,7 +783,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
             let idx = self.index;
             self.index += 1;
             if let Some(v) = &self.collection.data[idx] {
-                return Some((Into::<K>::into(idx + LOWER), &v));
+                return Some((NumCast::from(idx + LOWER).unwrap(), &v));
             }
         }
         None
@@ -826,7 +833,7 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
                 let ptr = self.collection.data.as_mut_ptr();
                 unsafe {
                     let v = (*ptr.add(idx)).as_mut().unwrap_unchecked();
-                    return Some((Into::<K>::into(idx + LOWER), v));
+                    return Some((NumCast::from(idx + LOWER).unwrap(), v));
                 }
             }
         }
@@ -876,7 +883,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
             if self.collection.data[idx].is_some() {
                 unsafe {
                     let v = self.collection.data[idx].take().unwrap_unchecked();
-                    return Some((Into::<K>::into(idx + LOWER), v));
+                    return Some((NumCast::from(idx + LOWER).unwrap(), v));
                 }
             }
         }
