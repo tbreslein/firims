@@ -47,115 +47,47 @@ following operations:
 - insertions
 - `.contains()` checks
 
-The benchmarks compares the the `firims::BitSet` with an `IntSet` from the
-`integer_hasher` crate. The benchmarks have been run on two different machines:
-An M2 macbook pro, as well as an `x86_64-linux` machine using a Ryzen 7 5800X CPU.
+The benchmarks compares the `firims::BitSet` with an `IntSet` from the
+`integer_hasher` crate, and the `firims::Map` with an `IntMap`. The benchmarks
+have been run on two different machines: An M2 macbook pro, as well as an
+`x86_64-linux` machine using a Ryzen 7 9800x3D CPU.
 
-In general, the `fibis::BitSet`s beats the `IntSet` in all those benchmarks,
-but the `IntSet` is also way more flexible then the `BitSet`s, allowing you to
-insert any `usize` at any time.
+In general, the `firims::BitSet`s beats the `IntSet` in all those benchmarks,
+but note that the `IntSet` is also way more flexible then the these data
+structures, allowing you to insert any sort of integer at any time. The range
+constraint on the values / keys is what unlocks those performance gains, but
+obviously it does not fit any use case.
 
 Also note that the benchmark results are very different between the M2 and the
 x86 architecture, with the latter producing a way larger gap between the
 `IntSet` and the `BitSet`s.
 
-### M2 benchmark results
+### M2
 
-```
-test construct intset 100 ... bench:         218 ns/iter (+/- 23)
-test construct BitSet 100 ... bench:         167 ns/iter (+/- 4)
+#### `IntSet` vs `firims::BitSet`
 
-test construct intset 1000 ... bench:        1947 ns/iter (+/- 162)
-test construct BitSet 1000 ... bench:        1902 ns/iter (+/- 67)
+| bench \ input size |    100 |    1,000 |    10,000 |    100,000 |    1,000,000 |
+| ------------------ | -----: | -------: | --------: | ---------: | -----------: |
+| **construction**   |    ... |      ... |       ... |        ... |          ... |
+| `IntSet`           | 281 ns | 2,576 ns | 25,711 ns | 254,961 ns | 2,585,656 ns |
+| `firims::BitSet`   | 189 ns | 2,015 ns | 19,890 ns | 198,217 ns | 1,987,995 ns |
+| **insertion**      |    ... |      ... |       ... |        ... |          ... |
+| `IntSet`           | 281 ns | 2,576 ns | 25,711 ns | 254,961 ns | 2,585,656 ns |
+| `firims::BitSet`   | 189 ns | 2,015 ns | 19,890 ns | 198,217 ns | 1,987,995 ns |
+| **contains**       |    ... |      ... |       ... |        ... |          ... |
+| `IntSet`           |  62 ns |   597 ns |  6,207 ns |  70,974 ns |   913,086 ns |
+| `firims::BitSet`   |  22 ns |   229 ns |  2,279 ns |  23,698 ns |   247,242 ns |
 
-test construct intset 10000 ... bench:       19255 ns/iter (+/- 583)
-test construct BitSet 10000 ... bench:       19193 ns/iter (+/- 604)
+#### `IntMap` vs `firims::Map`
 
-test construct intset 100000 ... bench:      192277 ns/iter (+/- 6017)
-test construct BitSet 100000 ... bench:      191929 ns/iter (+/- 6787)
-
-test construct intset 1000000 ... bench:     1960095 ns/iter (+/- 96563)
-test construct BitSet 1000000 ... bench:     1940932 ns/iter (+/- 27855)
-
-test insert intset 100 ... bench:          66 ns/iter (+/- 0)
-test insert BitSet 100 ... bench:          83 ns/iter (+/- 0)
-
-test insert intset 1000 ... bench:         668 ns/iter (+/- 21)
-test insert BitSet 1000 ... bench:         297 ns/iter (+/- 12)
-
-test insert intset 10000 ... bench:        6695 ns/iter (+/- 259)
-test insert BitSet 10000 ... bench:        2873 ns/iter (+/- 16)
-
-test insert intset 100000 ... bench:       80119 ns/iter (+/- 3076)
-test insert BitSet 100000 ... bench:       28937 ns/iter (+/- 238)
-
-test insert intset 1000000 ... bench:      958061 ns/iter (+/- 45137)
-test insert BitSet 1000000 ... bench:      295254 ns/iter (+/- 10133)
-
-test contains intset 100 ... bench:          59 ns/iter (+/- 1)
-test contains BitSet 100 ... bench:          22 ns/iter (+/- 3)
-
-test contains intset 1000 ... bench:         584 ns/iter (+/- 18)
-test contains BitSet 1000 ... bench:         225 ns/iter (+/- 8)
-
-test contains intset 10000 ... bench:        6094 ns/iter (+/- 173)
-test contains BitSet 10000 ... bench:        2211 ns/iter (+/- 177)
-
-test contains intset 100000 ... bench:       69544 ns/iter (+/- 1845)
-test contains BitSet 100000 ... bench:       23035 ns/iter (+/- 878)
-
-test contains intset 1000000 ... bench:      830553 ns/iter (+/- 48834)
-test contains BitSet 1000000 ... bench:      241406 ns/iter (+/- 5945)
-```
-
-### Ryzen 5800X results
-
-```
-test construct intset 100 ... bench:         281 ns/iter (+/- 1)
-test construct BitSet 100 ... bench:         102 ns/iter (+/- 6)
-
-test construct intset 1000 ... bench:        2581 ns/iter (+/- 84)
-test construct BitSet 1000 ... bench:         905 ns/iter (+/- 1)
-
-test construct intset 10000 ... bench:       23137 ns/iter (+/- 1366)
-test construct BitSet 10000 ... bench:        8240 ns/iter (+/- 22)
-
-test construct intset 100000 ... bench:      242723 ns/iter (+/- 15537)
-test construct BitSet 100000 ... bench:       92953 ns/iter (+/- 5730)
-
-test construct intset 1000000 ... bench:     2416880 ns/iter (+/- 3579)
-test construct BitSet 1000000 ... bench:      809255 ns/iter (+/- 1683)
-
-test insert intset 100 ... bench:          76 ns/iter (+/- 1)
-test insert BitSet 100 ... bench:          40 ns/iter (+/- 0)
-
-test insert intset 1000 ... bench:         779 ns/iter (+/- 48)
-test insert BitSet 1000 ... bench:         270 ns/iter (+/- 1)
-
-test insert intset 10000 ... bench:        8840 ns/iter (+/- 630)
-test insert BitSet 10000 ... bench:        2678 ns/iter (+/- 4)
-
-test insert intset 100000 ... bench:      156391 ns/iter (+/- 14140)
-test insert BitSet 100000 ... bench:       25735 ns/iter (+/- 303)
-
-test insert intset 1000000 ... bench:     1975837 ns/iter (+/- 42719)
-test insert BitSet 1000000 ... bench:      307859 ns/iter (+/- 387)
-
-test contains intset 100 ... bench:          69 ns/iter (+/- 0)
-test contains BitSet 100 ... bench:          24 ns/iter (+/- 1)
-
-test contains intset 1000 ... bench:         688 ns/iter (+/- 1)
-test contains BitSet 1000 ... bench:         284 ns/iter (+/- 20)
-
-test contains intset 10000 ... bench:        7607 ns/iter (+/- 453)
-test contains BitSet 10000 ... bench:        2541 ns/iter (+/- 8)
-
-test contains intset 100000 ... bench:      135306 ns/iter (+/- 369)
-test contains BitSet 100000 ... bench:       25945 ns/iter (+/- 318)
-
-test contains intset 1000000 ... bench:     1656241 ns/iter (+/- 19239)
-test contains BitSet 1000000 ... bench:      281744 ns/iter (+/- 13323)
-```
+| bench \ input size |    100 |    1,000 |    10,000 |    100,000 |    1,000,000 |
+| ------------------ | -----: | -------: | --------: | ---------: | -----------: |
+| **insertion**      |    ... |      ... |       ... |        ... |          ... |
+| `IntMap`           | 178 ns | 1,790 ns | 18,243 ns | 186,263 ns | 3,044,192 ns |
+| `firims::Map`      |  41 ns |   417 ns |  4,665 ns |  67,046 ns |   837,838 ns |
+| **contains**       |    ... |      ... |       ... |        ... |          ... |
+| `IntMap`           | 126 ns | 1,121 ns | 16,951 ns | 667,448 ns | 9,376,399 ns |
+| `firims::Map`      |  30 ns |   306 ns |  3,010 ns |  35,056 ns |   458,998 ns |
 
 ## License
 

@@ -103,7 +103,7 @@ fn contains<const LOWER: usize, const UPPER: usize>(c: &mut Criterion) {
     for (x, y) in rng_tuple.iter() {
         s.insert(*x, *y);
     }
-    c.bench_function(&format!("insert IntMap {}", UPPER).to_string(), |b| {
+    c.bench_function(&format!("contains IntMap {}", UPPER).to_string(), |b| {
         b.iter(|| {
             for x in rng.iter() {
                 black_box(s.contains_key(x));
@@ -114,13 +114,16 @@ fn contains<const LOWER: usize, const UPPER: usize>(c: &mut Criterion) {
     for (x, y) in rng_tuple.iter() {
         s.insert(*x, *y);
     }
-    c.bench_function(&format!("insert firims::Map {}", UPPER).to_string(), |b| {
-        b.iter(|| {
-            for x in rng.iter() {
-                black_box(s.contains_key(*x));
-            }
-        })
-    });
+    c.bench_function(
+        &format!("contains firims::Map {}", UPPER).to_string(),
+        |b| {
+            b.iter(|| {
+                for x in rng.iter() {
+                    black_box(s.contains_key(*x));
+                }
+            })
+        },
+    );
 }
 
 criterion_group!(
