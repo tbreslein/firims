@@ -4,7 +4,7 @@ FIxed Range Integer Maps and Sets
 
 ## General
 
-This crate implements a map ([Map]) and set ([BitSet]) for unsigned integer keys
+This crate implements a map ([VecMap]) and set ([BitSet]) for unsigned integer keys
 of a known range. For example, if you need a map with integer keys, and you know
 those keys can only ever be numbers between 10 and 200.
 
@@ -24,13 +24,13 @@ useful generic functionality, this crate uses [num_traits] as a dependency. With
 that, the keys / set members are limited to types implementing the [Integer]
 type.
 
-The two data structures, the [Map] and the [BitSet], have very simple
+The two data structures, the [VecMap] and the [BitSet], have very simple
 implementations. The former is just a `Vec<V>`, where `V` is your value type,
 and it maps keys to indexes in the `Vec` through a simple addition. As
-simple as that may be, the benefit of the [Map] is that it implements most of
+simple as that may be, the benefit of the [VecMap] is that it implements most of
 the of the same interface of the [std::collections::HashMap], making
 this a good drop-in replacement for most use cases (given that the
-[Map] constraints fir you use case).
+[VecMap] constraints fir you use case).
 
 The [BitSet] is, well, a bit set. Each key is mapped to a bit in an element in a
 `Vec<u64>`, and a value being present just means that the bit is set to 1.
@@ -48,7 +48,7 @@ following operations:
 - `.contains()` checks
 
 The benchmarks compares the [BitSet] with an `IntSet` from the `integer_hasher`
-crate, and the [Map] with an `IntMap`. The benchmarks have been run on two
+crate, and the [VecMap] with an `IntMap`. The benchmarks have been run on two
 different machines: An M2 macbook pro, as well as an `x86_64-linux` machine
 using a Ryzen 7 9800x3D CPU.
 
@@ -78,16 +78,16 @@ x86 architecture, with the latter producing a way larger gap between the
 | `IntSet`           |  62 ns |   597 ns |  6,207 ns |  70,974 ns |   913,086 ns |
 | [BitSet]           |  22 ns |   229 ns |  2,279 ns |  23,698 ns |   247,242 ns |
 
-#### `IntMap` vs [Map]
+#### `IntMap` vs [VecMap]
 
 | bench \ input size |    100 |    1,000 |    10,000 |    100,000 |    1,000,000 |
 | ------------------ | -----: | -------: | --------: | ---------: | -----------: |
 | **insertion**      |    ... |      ... |       ... |        ... |          ... |
 | `IntMap`           | 178 ns | 1,790 ns | 18,243 ns | 186,263 ns | 3,044,192 ns |
-| [Map]              |  41 ns |   417 ns |  4,665 ns |  67,046 ns |   837,838 ns |
+| [VecMap]           |  41 ns |   417 ns |  4,665 ns |  67,046 ns |   837,838 ns |
 | **contains**       |    ... |      ... |       ... |        ... |          ... |
 | `IntMap`           | 126 ns | 1,121 ns | 16,951 ns | 667,448 ns | 9,376,399 ns |
-| [Map]              |  30 ns |   306 ns |  3,010 ns |  35,056 ns |   458,998 ns |
+| [VecMap]           |  30 ns |   306 ns |  3,010 ns |  35,056 ns |   458,998 ns |
 
 ### Ryzen7 9800X3D
 
@@ -105,16 +105,16 @@ x86 architecture, with the latter producing a way larger gap between the
 | `IntSet`           |  52 ns |   489 ns |  4,973 ns |  67,423 ns | 1,096,985 ns |
 | [BitSet]           |  19 ns |   196 ns |  1,922 ns |  19,189 ns |   194,224 ns |
 
-#### `IntMap` vs [Map]
+#### `IntMap` vs [VecMap]
 
 | bench \ input size |    100 |    1,000 |    10,000 |    100,000 |    1,000,000 |
 | ------------------ | -----: | -------: | --------: | ---------: | -----------: |
 | **insertion**      |    ... |      ... |       ... |        ... |          ... |
 | `IntMap`           |  80 ns |   761 ns |  8,198 ns | 121,147 ns | 1,778,716 ns |
-| [Map]              |  30 ns |   297 ns |  3,231 ns |  34,430 ns |   484,658 ns |
+| [VecMap]           |  30 ns |   297 ns |  3,231 ns |  34,430 ns |   484,658 ns |
 | **contains**       |    ... |      ... |       ... |        ... |          ... |
 | `IntMap`           | 152 ns | 1,503 ns | 16,344 ns | 640,985 ns | 8,398,847 ns |
-| [Map]              |  16 ns |   171 ns |  2,012 ns |  27,972 ns |   357,651 ns |
+| [VecMap]           |  16 ns |   171 ns |  2,012 ns |  27,972 ns |   357,651 ns |
 
 ## License
 

@@ -67,7 +67,7 @@ fn insertion<const LOWER: usize, const UPPER: usize>(c: &mut Criterion) {
             }
         })
     });
-    let mut s = firims::Map::<LOWER, UPPER, usize, f32>::new();
+    let mut s = firims::VecMap::<LOWER, UPPER, usize, f32>::new();
     c.bench_function(&format!("insert firims::Map {}", UPPER).to_string(), |b| {
         b.iter(|| {
             for (x, y) in rng.iter() {
@@ -109,7 +109,7 @@ fn contains<const LOWER: usize, const UPPER: usize>(c: &mut Criterion) {
             }
         })
     });
-    let mut s = firims::Map::<LOWER, UPPER, usize, f32>::new();
+    let mut s = firims::VecMap::<LOWER, UPPER, usize, f32>::new();
     for (x, y) in rng_tuple.iter() {
         s.insert(*x, *y);
     }

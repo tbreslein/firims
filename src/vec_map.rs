@@ -18,23 +18,23 @@ use crate::Integer;
 /// out `u64`, because on a 32bit machine `usize` would be 32bit, and casting
 /// from a `u64` to `usize` would truncate.
 #[derive(Debug, Clone)]
-pub struct Map<const LOWER: usize, const UPPER: usize, K: Integer, V> {
+pub struct VecMap<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     data: Vec<Option<V>>,
     len: usize,
     phantom: PhantomData<K>,
 }
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Default
-    for Map<LOWER, UPPER, K, V>
+    for VecMap<LOWER, UPPER, K, V>
 {
-    /// Construct a new [Map<LOWER, UPPER, T>], where `LOWER` and `UPPER` are
-    /// `usize` integers that denote the boundaries of the [Map] keys, `K` is
+    /// Construct a new [VecMap<LOWER, UPPER, T>], where `LOWER` and `UPPER` are
+    /// `usize` integers that denote the boundaries of the [VecMap] keys, `K` is
     /// the type for the keys implementing the [Integer] trait, and `V` is the
     /// type for the values.
     ///
     /// ```
-    /// use firims::Map;
-    /// let foo = Map::<10, 20, usize, f32>::default();
+    /// use firims::VecMap;
+    /// let foo = VecMap::<10, 20, usize, f32>::default();
     /// ```
     fn default() -> Self {
         Self {
@@ -45,15 +45,15 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Default
     }
 }
 
-impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UPPER, K, V> {
-    /// Construct a new [Map<LOWER, UPPER, T>], where `LOWER` and `UPPER` are
-    /// `usize` integers that denote the boundaries of the [Map] keys, `K` is
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER, UPPER, K, V> {
+    /// Construct a new [VecMap<LOWER, UPPER, T>], where `LOWER` and `UPPER` are
+    /// `usize` integers that denote the boundaries of the [VecMap] keys, `K` is
     /// the type for the keys implementing the [Integer] trait, and `V` is the
     /// type for the values.
     ///
     /// ```
-    /// use firims::Map;
-    /// let foo = Map::<10, 20, usize, f32>::new();
+    /// use firims::VecMap;
+    /// let foo = VecMap::<10, 20, usize, f32>::new();
     /// ```
     pub fn new() -> Self {
         Self::default()
@@ -62,9 +62,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns the number of elements in the map.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(1, 11.1);
     /// foo.insert(10, 22.2);
     /// foo.insert(5, 33.3);
@@ -82,9 +82,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Checks whether the map is empty.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(1, 11.1);
     /// assert_eq!(foo.len(), 1);
     /// assert!(!foo.is_empty());
@@ -99,9 +99,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Removes all items from map.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(1, 11.1);
     /// foo.insert(10, 22.2);
     /// foo.insert(5, 33.3);
@@ -130,9 +130,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Return whether a key is present in the map.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<3, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<3, 32, usize, f32>::new();
     /// foo.insert(3, 11.1);
     /// foo.insert(10, 22.2);
     /// foo.insert(5, 33.3);
@@ -158,9 +158,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// This item `x` has to be constrained to `LOWER <= x <= UPPER`
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(10, 22.2);
     /// foo.insert(32, 33.3);
@@ -246,9 +246,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// An iterator visiting all keys in ascending order.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -266,9 +266,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// A consuming iterator visiting all keys in ascending order.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -286,9 +286,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// An iterator visiting all values in order of ascending keys.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -307,9 +307,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// mutable references.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -327,9 +327,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// A consuming iterator visiting all values in order of ascending order.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -347,9 +347,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// An iterator vising all key-value pairs in order of ascending keys.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -368,9 +368,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// returning mutable references to those values.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -389,9 +389,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// keys.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);
@@ -432,8 +432,8 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns a reference to the value corresponding to the key.
     ///
     /// ```
-    /// use firims::Map;
-    /// let mut foo = Map::<10, 20, usize, f32>::new();
+    /// use firims::VecMap;
+    /// let mut foo = VecMap::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
     /// assert_eq!(foo.get(10), Some(&11.1));
@@ -458,8 +458,8 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns a reference to the key-value pair corresponding to the key.
     ///
     /// ```
-    /// use firims::Map;
-    /// let mut foo = Map::<10, 20, usize, f32>::new();
+    /// use firims::VecMap;
+    /// let mut foo = VecMap::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
     /// assert_eq!(foo.get_key_value(10), Some((10, &11.1)));
@@ -472,8 +472,8 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     /// Returns a mutable reference to the value corresponding to the key.
     ///
     /// ```
-    /// use firims::Map;
-    /// let mut foo = Map::<10, 20, usize, f32>::new();
+    /// use firims::VecMap;
+    /// let mut foo = VecMap::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
     /// assert_eq!(foo.get_mut(10), Some(&mut 11.1));
@@ -496,7 +496,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UP
     }
 }
 
-/// Iterator visiting the keys of a [Map].
+/// Iterator visiting the keys of a [VecMap].
 #[derive(Debug, Clone, Copy)]
 pub struct Keys<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
     inner: Iter<'a, LOWER, UPPER, K, V>,
@@ -504,7 +504,7 @@ pub struct Keys<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
 
 impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Keys<'a, LOWER, UPPER, K, V> {
     /// Construct a new [Keys] for the `collection` argument.
-    fn new(collection: &'a Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: &'a VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             inner: Iter::new(collection),
         }
@@ -534,7 +534,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Consuming iterator visiting the keys of a [Map].
+/// Consuming iterator visiting the keys of a [VecMap].
 #[derive(Debug, Clone)]
 pub struct IntoKeys<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     inner: IntoIter<LOWER, UPPER, K, V>,
@@ -542,7 +542,7 @@ pub struct IntoKeys<const LOWER: usize, const UPPER: usize, K: Integer, V> {
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoKeys<LOWER, UPPER, K, V> {
     /// Construct a new [IntoKeys] for the `collection` argument.
-    fn new(collection: Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             inner: IntoIter::new(collection),
         }
@@ -572,7 +572,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Iterator visiting the values of a [Map].
+/// Iterator visiting the values of a [VecMap].
 #[derive(Debug, Clone, Copy)]
 pub struct Values<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
     inner: Iter<'a, LOWER, UPPER, K, V>,
@@ -580,7 +580,7 @@ pub struct Values<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
 
 impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Values<'a, LOWER, UPPER, K, V> {
     /// Construct a new [Values] for the `collection` argument.
-    fn new(collection: &'a Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: &'a VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             inner: Iter::new(collection),
         }
@@ -613,7 +613,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Iterator returning mutable references to values of a [Map].
+/// Iterator returning mutable references to values of a [VecMap].
 #[derive(Debug)]
 pub struct ValuesMut<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
     inner: IterMut<'a, LOWER, UPPER, K, V>,
@@ -621,7 +621,7 @@ pub struct ValuesMut<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> 
 
 impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> ValuesMut<'a, LOWER, UPPER, K, V> {
     /// Construct a new [ValuesMut] for the `collection` argument.
-    fn new(collection: &'a mut Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: &'a mut VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             inner: IterMut::new(collection),
         }
@@ -655,7 +655,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Consuming iterator over the values of a [Map].
+/// Consuming iterator over the values of a [VecMap].
 #[derive(Debug, Clone)]
 pub struct IntoValues<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     inner: IntoIter<LOWER, UPPER, K, V>,
@@ -663,7 +663,7 @@ pub struct IntoValues<const LOWER: usize, const UPPER: usize, K: Integer, V> {
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoValues<LOWER, UPPER, K, V> {
     /// Construct a new [IntoValues] for the `collection` argument.
-    fn new(collection: Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             inner: IntoIter::new(collection),
         }
@@ -693,16 +693,16 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Iterator visiting the key-value pairs of a [Map], leaving the map empty.
+/// Iterator visiting the key-value pairs of a [VecMap], leaving the map empty.
 #[derive(Debug)]
 pub struct Drain<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
     index: usize,
-    collection: &'a mut Map<LOWER, UPPER, K, V>,
+    collection: &'a mut VecMap<LOWER, UPPER, K, V>,
 }
 
 impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Drain<'a, LOWER, UPPER, K, V> {
     /// Construct a new [Drain] for the `collection` argument.
-    fn new(collection: &'a mut Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: &'a mut VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             index: 0,
             collection,
@@ -746,16 +746,16 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Iterator over the key-value pairs of a [Map]
+/// Iterator over the key-value pairs of a [VecMap]
 #[derive(Debug, Clone, Copy)]
 pub struct Iter<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
     index: usize,
-    collection: &'a Map<LOWER, UPPER, K, V>,
+    collection: &'a VecMap<LOWER, UPPER, K, V>,
 }
 
 impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iter<'a, LOWER, UPPER, K, V> {
     /// Construct a new [Iter] for the `collection` argument.
-    fn new(collection: &'a Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: &'a VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             index: 0,
             collection,
@@ -793,16 +793,16 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Iterator over mutable references of the key-value pairs of a [Map].
+/// Iterator over mutable references of the key-value pairs of a [VecMap].
 #[derive(Debug)]
 pub struct IterMut<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> {
     index: usize,
-    collection: &'a mut Map<LOWER, UPPER, K, V>,
+    collection: &'a mut VecMap<LOWER, UPPER, K, V>,
 }
 
 impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> IterMut<'a, LOWER, UPPER, K, V> {
     /// Construct a new [IterMut] for the `collection` argument.
-    fn new(collection: &'a mut Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: &'a mut VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             index: 0,
             collection,
@@ -844,16 +844,16 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 {
 }
 
-/// Consuming iterator over key-value pairs of a [Map].
+/// Consuming iterator over key-value pairs of a [VecMap].
 #[derive(Debug, Clone)]
 pub struct IntoIter<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     index: usize,
-    collection: Map<LOWER, UPPER, K, V>,
+    collection: VecMap<LOWER, UPPER, K, V>,
 }
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoIter<LOWER, UPPER, K, V> {
     /// Construct a new [IntoIter] for the `collection` argument.
-    fn new(collection: Map<LOWER, UPPER, K, V>) -> Self {
+    fn new(collection: VecMap<LOWER, UPPER, K, V>) -> Self {
         Self {
             index: 0,
             collection,
@@ -895,7 +895,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> FusedIterator
 }
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoIterator
-    for Map<LOWER, UPPER, K, V>
+    for VecMap<LOWER, UPPER, K, V>
 {
     type Item = (K, V);
     type IntoIter = IntoIter<LOWER, UPPER, K, V>;
@@ -904,9 +904,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoIterator
     /// keys.
     ///
     /// ```
-    /// use firims::Map;
+    /// use firims::VecMap;
     ///
-    /// let mut foo = Map::<0, 32, usize, f32>::new();
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
     /// foo.insert(0, 11.1);
     /// foo.insert(32, 33.3);
     /// foo.insert(10, 22.2);

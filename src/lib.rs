@@ -4,11 +4,11 @@
 
 mod bitset;
 mod integer;
-mod map;
+mod vec_map;
 
 pub use bitset::BitSet;
 pub use integer::Integer;
-pub use map::Map;
+pub use vec_map::VecMap;
 
 type BackingType = u64;
 const BIT_WIDTH: usize = BackingType::BITS as usize;
@@ -24,7 +24,7 @@ mod tests {
             .map(|k| (NumCast::from(k).unwrap(), 10.0 + k as f32))
             .collect::<Vec<(T, f32)>>();
         let mut set = BitSet::<LOWER, UPPER, T>::new();
-        let mut map = crate::Map::<LOWER, UPPER, T, f32>::new();
+        let mut map = crate::VecMap::<LOWER, UPPER, T, f32>::new();
 
         assert!(set.is_empty());
         assert!(map.is_empty());
