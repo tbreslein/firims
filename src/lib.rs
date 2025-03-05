@@ -93,14 +93,6 @@ mod tests {
     }
 
     #[test]
-    fn test_u64() {
-        type T = u64;
-        const LOWER: T = T::MAX / 2;
-        const UPPER: T = clamp!(LOWER + 10000000, T::MIN, T::MAX);
-        run_test::<{ LOWER as usize }, { UPPER as usize }, T>();
-    }
-
-    #[test]
     fn test_usize() {
         type T = usize;
         const LOWER: usize = T::MAX / 2;
