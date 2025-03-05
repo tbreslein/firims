@@ -1,4 +1,4 @@
-.PHONY: all release build test bench
+.PHONY: all release build test doc check bench
 
 all: release
 
@@ -10,6 +10,12 @@ build:
 
 test:
 	cargo test
+
+check:
+	cargo check && cargo clippy && cargo fmt --check
+
+doc:
+	cargo doc
 
 bench:
 	cargo bench -- --output-format=bencher

@@ -4,6 +4,19 @@ use num_traits::NumCast;
 
 use crate::Integer;
 
+/// A hash map, similar to [std::collections::HashMap], but with a number of
+/// limitations in order to improve the performance for specific use cases.
+///
+/// It limits the keys to unsigned integers within a range specified by
+/// the generic parameters, which allows membership to be boiled to down to a
+/// boolean or a bit. For uses cases that fit these constraints, it
+/// significantly increases performance compared to regular hash maps; even ones
+/// with integer specific hashers, simply because there is no hashing.
+///
+/// The keys need to implement the [Integer] trait, which is currently
+/// implemented for `u8`, `u16`, `u32`, and `usize`. I specifically left out
+/// out `u64`, because on a 32bit machine `usize` would be 32bit, and casting
+/// from a `u64` to `usize` would truncate.
 #[derive(Debug, Clone)]
 pub struct Map<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     data: Vec<Option<V>>,
@@ -14,6 +27,15 @@ pub struct Map<const LOWER: usize, const UPPER: usize, K: Integer, V> {
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Default
     for Map<LOWER, UPPER, K, V>
 {
+    /// Construct a new [Map<LOWER, UPPER, T>], where `LOWER` and `UPPER` are
+    /// `usize` integers that denote the boundaries of the [Map] keys, `K` is
+    /// the type for the keys implementing the [Integer] trait, and `V` is the
+    /// type for the values.
+    ///
+    /// ```
+    /// use firims::Map;
+    /// let foo = Map::<10, 20, usize, f32>::default();
+    /// ```
     fn default() -> Self {
         Self {
             data: vec![None; (UPPER - LOWER) + 1],
@@ -24,9 +46,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Default
 }
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Map<LOWER, UPPER, K, V> {
-    /// Construct a new [Map<LOWER, UPPER, T>], where [LOWER] and [UPPER] are
-    /// [usize] integers that denote the boundaries of the [Map] keys, [K] is
-    /// the type for the keys implementing the [Integer] trait, and [V] is the
+    /// Construct a new [Map<LOWER, UPPER, T>], where `LOWER` and `UPPER` are
+    /// `usize` integers that denote the boundaries of the [Map] keys, `K` is
+    /// the type for the keys implementing the [Integer] trait, and `V` is the
     /// type for the values.
     ///
     /// ```

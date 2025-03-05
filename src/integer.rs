@@ -2,6 +2,10 @@ use std::fmt::Debug;
 
 use num_traits::{PrimInt, Unsigned};
 
+/// Generic trait for integers to be used as set members in [crate::BitSet] and
+/// as keys in [crate::Map].
+///
+/// Based on [num_traits].
 pub trait Integer: Debug + PrimInt + Unsigned {}
 
 impl Integer for usize {}

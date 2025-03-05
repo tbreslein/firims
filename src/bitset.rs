@@ -9,8 +9,21 @@ use num_traits::NumCast;
 
 use crate::{integer::Integer, BackingType, BIT_WIDTH};
 
+/// A set, similar to [std::collections::HashSet], but with a number of
+/// limitations in order to improve the performance for specific use cases.
+///
+/// It limits the set members to unsigned integers within a range specified by
+/// the generic parameters, which allows set membership to be boiled to down to
+/// a boolean or a bit. For uses cases that fit these constraints, it
+/// significantly increases performance compared to regular hash sets; even ones
+/// with integer specific hashers, simply because there is no hashing.
+///
+/// The members of the set need to implement the [Integer] trait, which is
+/// currently implemented for `u8`, `u16`, `u32`, and `usize`. I specifically
+/// left out `u64`, because on a 32bit machine `usize` would be 32bit, and
+/// casting from a `u64` to `usize` would truncate.
 #[derive(Clone)]
-pub struct BitSet<const MIN: usize, const MAX: usize, T> {
+pub struct BitSet<const LOWER: usize, const UPPER: usize, T: Integer> {
     data: Vec<BackingType>,
     len: usize,
     phantom: PhantomData<T>,
@@ -23,6 +36,12 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Debug for BitSet<LOWER,
 }
 
 impl<const LOWER: usize, const UPPER: usize, T: Integer> Default for BitSet<LOWER, UPPER, T> {
+    /// Constructs an empty [BitSet].
+    ///
+    /// ```
+    /// use firims::BitSet;
+    /// let foo = BitSet::<10, 20, usize>::default();
+    /// ```
     fn default() -> Self {
         Self {
             data: vec![0; (UPPER - LOWER).div_ceil(BIT_WIDTH) + 1],
@@ -33,8 +52,8 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Default for BitSet<LOWE
 }
 
 impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T> {
-    /// Construct a new [BitSet<LOWER, UPPER, T>], where [LOWER] and [UPPER] are
-    /// [usize] integers that denote the boundaries of the [BitSet], and [T] is
+    /// Construct a new [BitSet<LOWER, UPPER, T>], where `LOWER` and `UPPER` are
+    /// `usize` integers that denote the boundaries of the [BitSet], and `T` is
     /// a type implementing the [Integer] trait
     ///
     /// ```
@@ -125,6 +144,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
         self.is_bit_set(idx, bit)
     }
 
+    /// Check whether the specific `bit` at `self.data[idx]` is set.
     fn is_bit_set(&self, idx: usize, bit: usize) -> bool {
         self.data[idx] & (1 << bit) != 0
     }
@@ -309,10 +329,10 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// are both in self and other.
     ///
     /// When an equal element is present in self and other then the resulting
-    /// [Intersection] may yield copies of one or the other. This can be
-    /// relevant if [T] contains fields which are not compared by its [Eq]
+    /// `Intersection` may yield copies of one or the other. This can be
+    /// relevant if `T` contains fields which are not compared by its [Eq]
     /// implementation, and may hold different value between the two equal
-    /// copies of [T] in the two sets.
+    /// copies of `T` in the two sets.
     ///
     /// ```
     /// use firims::BitSet;
@@ -514,6 +534,17 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Extend<T> for BitSet<LO
 impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Extend<&'a T>
     for BitSet<LOWER, UPPER, T>
 {
+    /// Extends a [BitSet<LOWER, UPPER, T>] with the contents of an iterator.
+    ///
+    /// ```
+    /// use firims::BitSet;
+    ///
+    /// let mut a = BitSet::<1, 6, usize>::from([1, 2, 3]);
+    /// a.extend(&[3, 4, 5]);
+    ///
+    /// assert_eq!(a.len(), 5);
+    /// assert_eq!(a, [1, 2, 3, 4, 5].iter().collect());
+    /// ```
     fn extend<I: IntoIterator<Item = &'a T>>(&mut self, iter: I) {
         for x in iter {
             self.insert(*x);
@@ -524,6 +555,16 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Extend<&'a T>
 impl<const LOWER: usize, const UPPER: usize, const M: usize, T: Integer> From<[T; M]>
     for BitSet<LOWER, UPPER, T>
 {
+    /// Construct a [BitSet<LOWER, UPPER, T>] from an array of `T`s.
+    ///
+    /// ```
+    /// use firims::BitSet;
+    ///
+    /// let mut a = BitSet::<1, 6, usize>::from([1, 2, 3]);
+    ///
+    /// assert_eq!(a.len(), 3);
+    /// assert_eq!(a, [1, 2, 3].iter().collect());
+    /// ```
     fn from(value: [T; M]) -> Self {
         Self::from_iter(value)
     }
@@ -532,6 +573,17 @@ impl<const LOWER: usize, const UPPER: usize, const M: usize, T: Integer> From<[T
 impl<const LOWER: usize, const UPPER: usize, T: Integer> FromIterator<T>
     for BitSet<LOWER, UPPER, T>
 {
+    /// Construct a [BitSet<LOWER, UPPER, T>] from an iterator of `T`s.
+    ///
+    /// ```
+    /// use firims::BitSet;
+    ///
+    /// let v = vec![1, 2, 3];
+    /// let mut a = BitSet::<1, 6, usize>::from_iter(v.into_iter());
+    ///
+    /// assert_eq!(a.len(), 3);
+    /// assert_eq!(a, [1, 2, 3].iter().collect());
+    /// ```
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut s = Self::new();
         s.extend(iter);
@@ -542,6 +594,17 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> FromIterator<T>
 impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> FromIterator<&'a T>
     for BitSet<LOWER, UPPER, T>
 {
+    /// Construct a [BitSet<LOWER, UPPER, T>] from an iterator of `&'a T`s.
+    ///
+    /// ```
+    /// use firims::BitSet;
+    ///
+    /// let v = vec![1, 2, 3];
+    /// let a = BitSet::<1, 6, usize>::from_iter(v.iter());
+    ///
+    /// assert_eq!(a.len(), 3);
+    /// assert_eq!(a, [1, 2, 3].iter().collect());
+    /// ```
     fn from_iter<I: IntoIterator<Item = &'a T>>(iter: I) -> Self {
         let mut s = Self::new();
         s.extend(iter);
@@ -558,7 +621,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> IntoIterator for BitSet
     /// ```
     /// use firims::BitSet;
     ///
-    /// let mut foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
+    /// let foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
     ///
     /// let mut iter = foo.into_iter();
     /// assert_eq!(iter.next(), Some(2));
@@ -576,6 +639,21 @@ impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> IntoIterator
 {
     type Item = T;
     type IntoIter = Iter<'a, LOWER, UPPER, T>;
+
+    /// A consuming iterator visiting all values of the set in ascending order.
+    ///
+    /// ```
+    /// use firims::BitSet;
+    ///
+    /// let foo = BitSet::<2, 5, usize>::from([2, 4, 5]);
+    /// let foo_ref = &foo;
+    ///
+    /// let mut iter = foo_ref.into_iter();
+    /// assert_eq!(iter.next(), Some(2));
+    /// assert_eq!(iter.next(), Some(4));
+    /// assert_eq!(iter.next(), Some(5));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     fn into_iter(self) -> Self::IntoIter {
         Iter::new(self)
     }
@@ -638,10 +716,10 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Sub for &BitSet<LOWER, 
     }
 }
 
-unsafe impl<const LOWER: usize, const UPPER: usize, T> Send for BitSet<LOWER, UPPER, T> {}
-unsafe impl<const LOWER: usize, const UPPER: usize, T> Sync for BitSet<LOWER, UPPER, T> {}
-impl<const LOWER: usize, const UPPER: usize, T> RefUnwindSafe for BitSet<LOWER, UPPER, T> {}
-impl<const LOWER: usize, const UPPER: usize, T> UnwindSafe for BitSet<LOWER, UPPER, T> {}
+unsafe impl<const LOWER: usize, const UPPER: usize, T: Integer> Send for BitSet<LOWER, UPPER, T> {}
+unsafe impl<const LOWER: usize, const UPPER: usize, T: Integer> Sync for BitSet<LOWER, UPPER, T> {}
+impl<const LOWER: usize, const UPPER: usize, T: Integer> RefUnwindSafe for BitSet<LOWER, UPPER, T> {}
+impl<const LOWER: usize, const UPPER: usize, T: Integer> UnwindSafe for BitSet<LOWER, UPPER, T> {}
 
 /// Iterator that visits the values representing the difference, i.e. the
 /// values that are in self but not in other.
@@ -831,12 +909,13 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for Iter<'_, L
 
 /// Draining iterator that visits the all values in the set, and leaves the
 /// iterated over spots in the set empty.
-pub struct Drain<'a, const LOWER: usize, const UPPER: usize, T> {
+#[derive(Debug)]
+pub struct Drain<'a, const LOWER: usize, const UPPER: usize, T: Integer> {
     index: usize,
     collection: &'a mut BitSet<LOWER, UPPER, T>,
 }
 
-impl<'a, const LOWER: usize, const UPPER: usize, T> Drain<'a, LOWER, UPPER, T> {
+impl<'a, const LOWER: usize, const UPPER: usize, T: Integer> Drain<'a, LOWER, UPPER, T> {
     fn new(collection: &'a mut BitSet<LOWER, UPPER, T>) -> Self {
         Self {
             index: LOWER,
@@ -865,6 +944,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for Drain<'_, 
 }
 
 /// Consuming iterator that visits all values in the set.
+#[derive(Debug)]
 pub struct IntoIter<const LOWER: usize, const UPPER: usize, T: Integer> {
     index: usize,
     collection: BitSet<LOWER, UPPER, T>,
