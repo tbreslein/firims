@@ -23,6 +23,7 @@ use crate::{integer::Integer, BackingType, BIT_WIDTH};
 /// left out `u64`, because on a 32bit machine `usize` would be 32bit, and
 /// casting from a `u64` to `usize` would truncate.
 #[derive(Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BitSet<const LOWER: usize, const UPPER: usize, T: Integer> {
     data: Vec<BackingType>,
     len: usize,

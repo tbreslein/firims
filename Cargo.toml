@@ -1,14 +1,19 @@
 [package]
 name = "firims"
-version = "0.1.0"
-edition = "2021"
-license-file = "LICENSE"
 description = "fixed range integer maps and sets"
+authors = ["Tommy Breslein <github.com/tbreslein>"]
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
 readme = "README.md"
+documentation = "https://docs.rs/firims"
+repository = "https://github.com/tbreslein/firims"
 exclude = [ "./bench_results/*" ]
 
 [dependencies]
 num-traits = "0.2.19"
+serde = { version = "1.0.218", optional = true }
+serde_json = { version = "1.0.140", optional = true }
 
 [lib]
 bench = false
@@ -21,3 +26,8 @@ harness = false
 criterion = "0.5.1"
 integer-hasher = "0.1.1"
 rand = "0.9.0"
+
+[features]
+default = []
+serde = ["dep:serde"]
+serde_json = ["dep:serde_json"]

@@ -38,6 +38,13 @@ Again, very simple implementation, pretty easy to replicate, but it implements
 the majority of the [std::collections::HashSet] interface in order to make the
 bitset a drop-in replacement.
 
+## Feature flags
+
+This crate has no default features, and a couple of optional ones:
+
+- `serde`: Add derives for `serde::Serialize` and `::Deserialize` for [VecMap]
+  and [BitMap]
+
 ## Benchmarks
 
 This crate contains a benchmark file `benches/bench.rs`, which benchmarks the
