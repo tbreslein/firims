@@ -18,7 +18,7 @@ use crate::Integer;
 /// out `u64`, because on a 32bit machine `usize` would be 32bit, and casting
 /// from a `u64` to `usize` would truncate.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VecMap<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     data: Vec<Option<V>>,
     len: usize,
