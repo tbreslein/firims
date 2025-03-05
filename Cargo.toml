@@ -9,6 +9,8 @@ readme = "README.md"
 documentation = "https://docs.rs/firims"
 repository = "https://github.com/tbreslein/firims"
 exclude = [ "./bench_results/*" ]
+keywords = [ "data-structures" ]
+categories = [ "data-structures" ]
 
 [dependencies]
 num-traits = "0.2.19"
