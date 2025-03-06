@@ -40,10 +40,10 @@ bitset a drop-in replacement.
 
 ## Feature flags
 
-This crate has no default features, and a couple of optional ones:
+This crate has no default features, and one optional feature:
 
 - `serde`: Add derives for `serde::Serialize` and `::Deserialize` for [VecMap]
-  and [BitMap]
+  and [BitSet]
 
 ## Benchmarks
 
