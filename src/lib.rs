@@ -30,15 +30,15 @@ mod tests {
         assert!(map.is_empty());
         for (k, v) in input.iter() {
             assert!(!set.contains(k));
-            assert!(!map.contains_key(*k));
-            assert!(map.get(*k).is_none());
+            assert!(!map.contains_key(k));
+            assert!(map.get(k).is_none());
 
             set.insert(*k);
             assert!(map.insert(*k, *v).is_none());
 
             assert!(set.contains(k));
-            assert!(map.contains_key(*k));
-            assert!(map.get(*k).is_some_and(|x| *x == *v));
+            assert!(map.contains_key(k));
+            assert!(map.get(k).is_some_and(|x| *x == *v));
         }
 
         assert_eq!(set.len(), input.len());
@@ -46,15 +46,15 @@ mod tests {
 
         for (k, v) in input.iter() {
             assert!(set.contains(k));
-            assert!(map.contains_key(*k));
-            assert!(map.get(*k).is_some_and(|x| *x == *v));
+            assert!(map.contains_key(k));
+            assert!(map.get(k).is_some_and(|x| *x == *v));
 
             set.remove(k);
-            map.remove(*k);
+            map.remove(k);
 
             assert!(!set.contains(k));
-            assert!(!map.contains_key(*k));
-            assert!(map.get(*k).is_none());
+            assert!(!map.contains_key(k));
+            assert!(map.get(k).is_none());
         }
         assert!(set.is_empty());
         assert!(map.is_empty());

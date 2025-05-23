@@ -72,7 +72,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     ///
     /// assert_eq!(foo.len(), 3);
     ///
-    /// foo.remove(1);
+    /// foo.remove(&1);
     /// assert_eq!(foo.len(), 2);
     /// ```
     pub fn len(&self) -> usize {
@@ -90,7 +90,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// assert_eq!(foo.len(), 1);
     /// assert!(!foo.is_empty());
     ///
-    /// foo.remove(1);
+    /// foo.remove(&1);
     /// assert!(foo.is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
@@ -115,10 +115,7 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// assert!(foo.is_empty());
     /// ```
     pub fn clear(&mut self) {
-        // TODO: can I make sure this is vectorized?
-        for x in self.data.iter_mut() {
-            *x = None;
-        }
+        self.data.fill(None);
         debug_assert_eq!(self.data.iter().filter(|x| x.is_some()).count(), 0);
         self.len = 0;
     }
@@ -139,11 +136,12 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// foo.insert(5, 33.3);
     ///
     /// assert_eq!(foo.len(), 3);
-    /// assert!(foo.contains_key(3));
-    /// assert!(foo.contains_key(10));
-    /// assert!(foo.contains_key(5));
+    /// assert!(foo.contains_key(&3));
+    /// assert!(foo.contains_key(&10));
+    /// assert!(foo.contains_key(&5));
     /// ```
-    pub fn contains_key(&self, x: K) -> bool {
+    pub fn contains_key(&self, x: &K) -> bool {
+        let x = *x;
         x >= NumCast::from(LOWER).unwrap()
             && x <= NumCast::from(UPPER).unwrap()
             && self.data[Self::position(x)].is_some()
@@ -165,17 +163,17 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// foo.insert(0, 11.1);
     /// foo.insert(10, 22.2);
     /// foo.insert(32, 33.3);
-    /// assert!(foo.contains_key(0));
-    /// assert!(foo.contains_key(10));
-    /// assert!(foo.contains_key(32));
-    /// assert!(!foo.contains_key(2));
+    /// assert!(foo.contains_key(&0));
+    /// assert!(foo.contains_key(&10));
+    /// assert!(foo.contains_key(&32));
+    /// assert!(!foo.contains_key(&2));
     ///
-    /// foo.remove(0);
-    /// foo.remove(10);
-    /// foo.remove(32);
-    /// assert!(!foo.contains_key(0));
-    /// assert!(!foo.contains_key(10));
-    /// assert!(!foo.contains_key(32));
+    /// foo.remove(&0);
+    /// foo.remove(&10);
+    /// foo.remove(&32);
+    /// assert!(!foo.contains_key(&0));
+    /// assert!(!foo.contains_key(&10));
+    /// assert!(!foo.contains_key(&32));
     /// ```
     pub fn insert(&mut self, k: K, v: V) -> Option<V> {
         debug_assert!(
@@ -200,7 +198,8 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
 
     /// Removes a key from the map, returning the value at the key if the key
     /// was previously in the map.
-    pub fn remove(&mut self, k: K) -> Option<V> {
+    pub fn remove(&mut self, k: &K) -> Option<V> {
+        let k = *k;
         debug_assert!(
             k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried removing at key={:#?}, but lower bound is set to {}",
@@ -223,7 +222,8 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
 
     /// Removes a key from the map, returning the stored key and value if the
     /// key was previously in the map.
-    pub fn remove_entry(&mut self, k: K) -> Option<(K, V)> {
+    pub fn remove_entry(&mut self, k: &K) -> Option<(K, V)> {
+        let k = *k;
         debug_assert!(
             k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried removing at key={:#?}, but lower bound is set to {}",
@@ -437,10 +437,11 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// let mut foo = VecMap::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
-    /// assert_eq!(foo.get(10), Some(&11.1));
-    /// assert_eq!(foo.get(20), None);
+    /// assert_eq!(foo.get(&10), Some(&11.1));
+    /// assert_eq!(foo.get(&20), None);
     /// ```
-    pub fn get(&self, k: K) -> Option<&V> {
+    pub fn get(&self, k: &K) -> Option<&V> {
+        let k = *k;
         debug_assert!(
             k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried retrieving at key={:#?}, but lower bound is set to {}",
@@ -463,11 +464,11 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// let mut foo = VecMap::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
-    /// assert_eq!(foo.get_key_value(10), Some((10, &11.1)));
-    /// assert_eq!(foo.get_key_value(20), None);
+    /// assert_eq!(foo.get_key_value(&10), Some((10, &11.1)));
+    /// assert_eq!(foo.get_key_value(&20), None);
     /// ```
-    pub fn get_key_value(&self, k: K) -> Option<(K, &V)> {
-        self.get(k).map(|value| (k, value))
+    pub fn get_key_value(&self, k: &K) -> Option<(K, &V)> {
+        self.get(k).map(|value| (*k, value))
     }
 
     /// Returns a mutable reference to the value corresponding to the key.
@@ -477,10 +478,11 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// let mut foo = VecMap::<10, 20, usize, f32>::new();
     ///
     /// foo.insert(10, 11.1);
-    /// assert_eq!(foo.get_mut(10), Some(&mut 11.1));
-    /// assert_eq!(foo.get(20), None);
+    /// assert_eq!(foo.get_mut(&10), Some(&mut 11.1));
+    /// assert_eq!(foo.get(&20), None);
     /// ```
-    pub fn get_mut(&mut self, k: K) -> Option<&mut V> {
+    pub fn get_mut(&mut self, k: &K) -> Option<&mut V> {
+        let k = *k;
         debug_assert!(
             k >= NumCast::from(LOWER).unwrap(),
             "Out of bounds: Tried retrieving at key={:#?}, but lower bound is set to {}",
