@@ -118,7 +118,7 @@ fn contains<const LOWER: usize, const UPPER: usize>(c: &mut Criterion) {
         |b| {
             b.iter(|| {
                 for x in rng.iter() {
-                    black_box(s.contains_key(*x));
+                    black_box(s.contains_key(x));
                 }
             })
         },
