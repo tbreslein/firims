@@ -1,4 +1,4 @@
-use std::{iter::FusedIterator, marker::PhantomData};
+use std::iter::FusedIterator;
 
 use num_traits::NumCast;
 
@@ -22,7 +22,8 @@ use crate::Integer;
 pub struct VecMap<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     data: Vec<Option<V>>,
     len: usize,
-    phantom: PhantomData<K>,
+    lower_cast: K,
+    upper_cast: K,
 }
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Default
@@ -41,9 +42,38 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Default
         Self {
             data: vec![None; (UPPER - LOWER) + 1],
             len: 0,
-            phantom: PhantomData::<K>,
+            lower_cast: if let Some(lower_cast) = NumCast::from(LOWER) {
+                lower_cast
+            } else {
+                panic!(
+                    "Unable to cast LOWER bound of BitSet<{}, {}> into \
+                    associated type",
+                    LOWER, UPPER,
+                )
+            },
+            upper_cast: if let Some(upper_cast) = NumCast::from(UPPER) {
+                upper_cast
+            } else {
+                panic!(
+                    "Unable to cast UPPER bound of BitSet<{}, {}> into \
+                    associated type",
+                    LOWER, UPPER,
+                )
+            },
         }
     }
+}
+
+macro_rules! bounds_check {
+    ($k:expr, $self:expr) => {
+        assert!(
+            $k >= $self.lower_cast && $k <= $self.upper_cast,
+            "Out of bounds: VecMap<{}, {}> can never contain {:?}",
+            LOWER,
+            UPPER,
+            $k
+        );
+    };
 }
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER, UPPER, K, V> {
@@ -116,7 +146,6 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// ```
     pub fn clear(&mut self) {
         self.data.fill(None);
-        debug_assert_eq!(self.data.iter().filter(|x| x.is_some()).count(), 0);
         self.len = 0;
     }
 
@@ -142,9 +171,17 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// ```
     pub fn contains_key(&self, x: &K) -> bool {
         let x = *x;
-        x >= NumCast::from(LOWER).unwrap()
-            && x <= NumCast::from(UPPER).unwrap()
-            && self.data[Self::position(x)].is_some()
+        unsafe {
+            // SAFETY: the explicit bounds checks make sure that we avoid
+            // out-of-bounds errors, since the condition short circuits
+            x >= NumCast::from(LOWER).unwrap()
+                && x <= NumCast::from(UPPER).unwrap()
+                && self.contains_key_unsafe(x)
+        }
+    }
+
+    unsafe fn contains_key_unsafe(&self, x: K) -> bool {
+        self.get_unchecked(x).is_some()
     }
 
     /// Insert a key value pair into the map.
@@ -176,23 +213,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// assert!(!foo.contains_key(&32));
     /// ```
     pub fn insert(&mut self, k: K, v: V) -> Option<V> {
-        debug_assert!(
-            k >= NumCast::from(LOWER).unwrap(),
-            "Out of bounds: Tried inserting at key={:#?}, but lower bound is set to {}",
-            k,
-            LOWER
-        );
-        debug_assert!(
-            k <= NumCast::from(UPPER).unwrap(),
-            "Out of bounds: Tried inserting at key={:#?}, but upper bound is set to {}",
-            k,
-            UPPER
-        );
-        if let old_v @ Some(_) = self.data[Self::position(k)].replace(v) {
-            old_v
-        } else {
-            self.len += 1;
-            None
+        bounds_check!(k, self);
+        unsafe {
+            if let old_v @ Some(_) = self.get_unchecked_mut(k).replace(v) {
+                old_v
+            } else {
+                self.len += 1;
+                None
+            }
         }
     }
 
@@ -200,23 +228,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// was previously in the map.
     pub fn remove(&mut self, k: &K) -> Option<V> {
         let k = *k;
-        debug_assert!(
-            k >= NumCast::from(LOWER).unwrap(),
-            "Out of bounds: Tried removing at key={:#?}, but lower bound is set to {}",
-            k,
-            LOWER
-        );
-        debug_assert!(
-            k <= NumCast::from(UPPER).unwrap(),
-            "Out of bounds: Tried removing at key={:#?}, but upper bound is set to {}",
-            k,
-            UPPER
-        );
-        if let old_v @ Some(_) = self.data[Self::position(k)].take() {
-            self.len -= 1;
-            old_v
-        } else {
-            None
+        bounds_check!(k, self);
+        unsafe {
+            if let old_v @ Some(_) = self.get_unchecked_mut(k).take() {
+                self.len -= 1;
+                old_v
+            } else {
+                None
+            }
         }
     }
 
@@ -224,23 +243,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// key was previously in the map.
     pub fn remove_entry(&mut self, k: &K) -> Option<(K, V)> {
         let k = *k;
-        debug_assert!(
-            k >= NumCast::from(LOWER).unwrap(),
-            "Out of bounds: Tried removing at key={:#?}, but lower bound is set to {}",
-            k,
-            LOWER
-        );
-        debug_assert!(
-            k <= NumCast::from(UPPER).unwrap(),
-            "Out of bounds: Tried removing at key={:#?}, but upper bound is set to {}",
-            k,
-            UPPER
-        );
-        if let Some(old_v) = self.data[Self::position(k)].take() {
-            self.len -= 1;
-            Some((k, old_v))
-        } else {
-            None
+        bounds_check!(k, self);
+        unsafe {
+            if let Some(old_v) = self.get_unchecked_mut(k).take() {
+                self.len -= 1;
+                Some((k, old_v))
+            } else {
+                None
+            }
         }
     }
 
@@ -419,13 +429,16 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
         F: Fn(&K, &mut V) -> bool,
     {
         for i in 0..self.len() {
-            if self.data[i].is_some()
-                && f(
-                    &NumCast::from(i + LOWER).unwrap(),
-                    self.data[i].as_mut().unwrap(),
-                )
-            {
-                self.data[i] = None;
+            unsafe {
+                // SAFETY: the for loop protects against out-of-bounds
+                if self.data.get_unchecked(i).is_some()
+                    && f(
+                        &NumCast::from(i + LOWER).unwrap(),
+                        self.data.get_unchecked_mut(i).as_mut().unwrap(),
+                    )
+                {
+                    self.data[i] = None;
+                }
             }
         }
     }
@@ -442,19 +455,16 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// ```
     pub fn get(&self, k: &K) -> Option<&V> {
         let k = *k;
-        debug_assert!(
-            k >= NumCast::from(LOWER).unwrap(),
-            "Out of bounds: Tried retrieving at key={:#?}, but lower bound is set to {}",
-            k,
-            LOWER
-        );
-        debug_assert!(
-            k <= NumCast::from(UPPER).unwrap(),
-            "Out of bounds: Tried retrieving at key={:#?}, but upper bound is set to {}",
-            k,
-            UPPER
-        );
-        self.data[Self::position(k)].as_ref()
+        bounds_check!(k, self);
+        unsafe { self.get_unchecked(k) }
+    }
+
+    unsafe fn get_unchecked(&self, x: K) -> Option<&V> {
+        self.data.get_unchecked(Self::position(x)).as_ref()
+    }
+
+    unsafe fn get_unchecked_mut(&mut self, x: K) -> &mut Option<V> {
+        self.data.get_unchecked_mut(Self::position(x))
     }
 
     /// Returns a reference to the key-value pair corresponding to the key.
@@ -483,19 +493,8 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// ```
     pub fn get_mut(&mut self, k: &K) -> Option<&mut V> {
         let k = *k;
-        debug_assert!(
-            k >= NumCast::from(LOWER).unwrap(),
-            "Out of bounds: Tried retrieving at key={:#?}, but lower bound is set to {}",
-            k,
-            LOWER
-        );
-        debug_assert!(
-            k <= NumCast::from(UPPER).unwrap(),
-            "Out of bounds: Tried retrieving at key={:#?}, but upper bound is set to {}",
-            k,
-            UPPER
-        );
-        self.data[Self::position(k)].as_mut()
+        bounds_check!(k, self);
+        unsafe { self.get_unchecked_mut(k).as_mut() }
     }
 }
 
@@ -721,12 +720,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
         while self.index < self.collection.data.len() {
             let idx = self.index;
             self.index += 1;
-            if self.collection.data[idx].is_some() {
-                self.collection.len -= 1;
-                unsafe {
+            unsafe {
+                // SAFETY: the while loop protects against out-of-bounds
+                let x = self.collection.data.get_unchecked_mut(idx);
+                if x.is_some() {
+                    self.collection.len -= 1;
                     return Some((
                         NumCast::from(idx + LOWER).unwrap(),
-                        self.collection.data[idx].take().unwrap_unchecked(),
+                        x.take().unwrap_unchecked(),
                     ));
                 }
             }
@@ -774,8 +775,11 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
         while self.index < self.collection.data.len() {
             let idx = self.index;
             self.index += 1;
-            if let Some(v) = &self.collection.data[idx] {
-                return Some((NumCast::from(idx + LOWER).unwrap(), v));
+            unsafe {
+                // SAFETY: the while loop protects against out-of-bounds
+                if let Some(v) = &self.collection.data.get_unchecked(idx) {
+                    return Some((NumCast::from(idx + LOWER).unwrap(), v));
+                }
             }
         }
         None
@@ -821,9 +825,10 @@ impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
         while self.index < self.collection.data.len() {
             let idx = self.index;
             self.index += 1;
-            if self.collection.data[idx].is_some() {
-                let ptr = self.collection.data.as_mut_ptr();
-                unsafe {
+            unsafe {
+                // SAFETY: the while loop protects against out-of-bounds
+                if self.collection.data.get_unchecked(idx).is_some() {
+                    let ptr = self.collection.data.as_mut_ptr();
                     let v = (*ptr.add(idx)).as_mut().unwrap_unchecked();
                     return Some((NumCast::from(idx + LOWER).unwrap(), v));
                 }
@@ -872,8 +877,9 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> Iterator
         while self.index < self.collection.data.len() {
             let idx = self.index;
             self.index += 1;
-            if self.collection.data[idx].is_some() {
-                unsafe {
+            unsafe {
+                // SAFETY: the while loop protects against out-of-bounds
+                if self.collection.data.get_unchecked(idx).is_some() {
                     let v = self.collection.data[idx].take().unwrap_unchecked();
                     return Some((NumCast::from(idx + LOWER).unwrap(), v));
                 }
