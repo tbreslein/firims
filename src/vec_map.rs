@@ -17,7 +17,7 @@ use crate::Integer;
 /// implemented for `u8`, `u16`, `u32`, and `usize`. I specifically left out
 /// out `u64`, because on a 32bit machine `usize` would be 32bit, and casting
 /// from a `u64` to `usize` would truncate.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VecMap<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     data: Vec<Option<V>>,
