@@ -91,7 +91,7 @@ fn contains<const LOWER: usize, const UPPER: usize>(c: &mut Criterion) {
     c.bench_function(&format!("contains BitSet {}", UPPER).to_string(), |b| {
         b.iter(|| {
             for x in rng.iter() {
-                black_box(s.contains(*x));
+                black_box(s.contains(x));
             }
         })
     });

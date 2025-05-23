@@ -1,6 +1,5 @@
 use std::{
     fmt::Debug,
-    marker::PhantomData,
     ops::{BitAnd, BitOr, BitXor, Sub},
     panic::{RefUnwindSafe, UnwindSafe},
 };
@@ -27,7 +26,8 @@ use crate::{integer::Integer, BackingType, BIT_WIDTH};
 pub struct BitSet<const LOWER: usize, const UPPER: usize, T: Integer> {
     data: Vec<BackingType>,
     len: usize,
-    phantom: PhantomData<T>,
+    lower_cast: T,
+    upper_cast: T,
 }
 
 impl<const LOWER: usize, const UPPER: usize, T: Integer> Debug for BitSet<LOWER, UPPER, T> {
@@ -47,9 +47,38 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Default for BitSet<LOWE
         Self {
             data: vec![0; (UPPER - LOWER).div_ceil(BIT_WIDTH) + 1],
             len: 0,
-            phantom: PhantomData::<T>,
+            lower_cast: if let Some(lower_cast) = NumCast::from(LOWER) {
+                lower_cast
+            } else {
+                panic!(
+                    "Unable to cast LOWER bound of BitSet<{}, {}> into \
+                    associated type",
+                    LOWER, UPPER,
+                )
+            },
+            upper_cast: if let Some(upper_cast) = NumCast::from(UPPER) {
+                upper_cast
+            } else {
+                panic!(
+                    "Unable to cast UPPER bound of BitSet<{}, {}> into \
+                    associated type",
+                    LOWER, UPPER,
+                )
+            },
         }
     }
+}
+
+macro_rules! bounds_check {
+    ($x:expr, $self:expr) => {
+        assert!(
+            $x >= $self.lower_cast && $x <= $self.upper_cast,
+            "Out of bounds: BitSet<{}, {}> can never contain {:?}",
+            LOWER,
+            UPPER,
+            $x
+        );
+    };
 }
 
 impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T> {
@@ -73,7 +102,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// let mut foo = BitSet::<0, 32, usize>::from([1, 10, 5]);
     /// assert_eq!(foo.len(), 3);
     ///
-    /// foo.remove(1);
+    /// foo.remove(&1);
     /// assert_eq!(foo.len(), 2);
     /// ```
     pub fn len(&self) -> usize {
@@ -93,7 +122,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// assert_eq!(foo.len(), 1);
     /// assert!(!foo.is_empty());
     ///
-    /// foo.remove(1);
+    /// foo.remove(&1);
     /// assert!(foo.is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
@@ -114,10 +143,7 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// assert!(foo.is_empty());
     /// ```
     pub fn clear(&mut self) {
-        // TODO: can I make sure this is vectorized?
-        for x in self.data.iter_mut() {
-            *x = 0_u64;
-        }
+        self.data.fill(0u64);
         debug_assert_eq!(self.data.iter().map(|x| x.count_ones()).sum::<u32>(), 0);
         self.len = 0;
     }
@@ -136,18 +162,23 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// let mut foo = BitSet::<3, 32, usize>::from([3, 10, 5]);
     ///
     /// assert_eq!(foo.len(), 3);
-    /// assert!(foo.contains(3));
-    /// assert!(foo.contains(10));
-    /// assert!(foo.contains(5));
+    /// assert!(foo.contains(&3));
+    /// assert!(foo.contains(&10));
+    /// assert!(foo.contains(&5));
     /// ```
-    pub fn contains(&self, x: T) -> bool {
+    pub fn contains(&self, x: &T) -> bool {
+        bounds_check!(*x, self);
+        unsafe { self.contains_unsafe(*x) }
+    }
+
+    unsafe fn contains_unsafe(&self, x: T) -> bool {
         let (idx, bit) = Self::position(x);
         self.is_bit_set(idx, bit)
     }
 
     /// Check whether the specific `bit` at `self.data[idx]` is set.
     fn is_bit_set(&self, idx: usize, bit: usize) -> bool {
-        self.data[idx] & (1 << bit) != 0
+        unsafe { *self.data.get_unchecked(idx) & (1 << bit) != 0 }
     }
 
     /// Insert an item into the set.
@@ -161,25 +192,29 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// foo.insert(0);
     /// foo.insert(10);
     /// foo.insert(32);
-    /// assert!(foo.contains(0));
-    /// assert!(foo.contains(10));
-    /// assert!(foo.contains(32));
-    /// assert!(!foo.contains(2));
+    /// assert!(foo.contains(&0));
+    /// assert!(foo.contains(&10));
+    /// assert!(foo.contains(&32));
+    /// assert!(!foo.contains(&2));
     ///
-    /// foo.remove(0);
-    /// foo.remove(10);
-    /// foo.remove(32);
-    /// assert!(!foo.contains(0));
-    /// assert!(!foo.contains(10));
-    /// assert!(!foo.contains(32));
+    /// foo.remove(&0);
+    /// foo.remove(&10);
+    /// foo.remove(&32);
+    /// assert!(!foo.contains(&0));
+    /// assert!(!foo.contains(&10));
+    /// assert!(!foo.contains(&32));
     /// ```
     pub fn insert(&mut self, x: T) {
-        debug_assert!(x >= NumCast::from(LOWER).unwrap());
-        debug_assert!(x <= NumCast::from(UPPER).unwrap());
+        bounds_check!(x, self);
+        unsafe {
+            self.insert_unsafe(x);
+        }
+    }
 
+    unsafe fn insert_unsafe(&mut self, x: T) {
         let (idx, bit) = Self::position(x);
         self.len += Into::<usize>::into(!self.is_bit_set(idx, bit));
-        self.data[idx] |= 1 << bit;
+        *self.data.get_unchecked_mut(idx) |= 1 << bit;
     }
 
     /// Removes an item from the set.
@@ -188,15 +223,22 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1]);
-    /// assert!(foo.contains(1));
+    /// assert!(foo.contains(&1));
     ///
-    /// foo.remove(1);
-    /// assert!(!foo.contains(1));
+    /// foo.remove(&1);
+    /// assert!(!foo.contains(&1));
     /// ```
-    pub fn remove(&mut self, x: T) {
+    pub fn remove(&mut self, x: &T) {
+        bounds_check!(*x, self);
+        unsafe {
+            self.remove_unsafe(*x);
+        }
+    }
+
+    unsafe fn remove_unsafe(&mut self, x: T) {
         let (idx, bit) = Self::position(x);
         self.len = self.len.saturating_sub(self.is_bit_set(idx, bit).into());
-        self.data[idx] ^= 1 << bit;
+        *self.data.get_unchecked_mut(idx) ^= 1 << bit;
     }
 
     /// Using the predicate `f` passed to this method, filter the set such that
@@ -209,15 +251,17 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     ///
     /// foo.retain(|x| x % 2 == 0);
     ///
-    /// assert!(foo.contains(2));
-    /// assert!(!foo.contains(1));
-    /// assert!(!foo.contains(3));
+    /// assert!(foo.contains(&2));
+    /// assert!(!foo.contains(&1));
+    /// assert!(!foo.contains(&3));
     /// ```
     pub fn retain(&mut self, f: impl Fn(T) -> bool) {
         for x in LOWER..=UPPER {
             let x = NumCast::from(x).unwrap();
             if !f(x) {
-                self.remove(x);
+                unsafe {
+                    self.remove_unsafe(x);
+                }
             }
         }
     }
@@ -225,23 +269,30 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// Removes and returns the value in the set, if any, that is equal to the
     /// given one.
     ///
+    /// Also returns none, if the value is outside of the bounds of the BitSet.
+    ///
     /// ```
     /// use firims::BitSet;
     ///
     /// let mut foo = BitSet::<0, 32, usize>::from([1, 2, 3]);
     ///
     /// assert_eq!(foo.len(), 3);
-    /// assert!(foo.contains(2));
-    /// assert_eq!(foo.take(2), Some(2));
+    /// assert!(foo.contains(&2));
+    /// assert_eq!(foo.take(&2), Some(2));
     /// assert_eq!(foo.len(), 2);
-    /// assert_eq!(foo.take(2), None);
+    /// assert_eq!(foo.take(&2), None);
     /// ```
-    pub fn take(&mut self, v: T) -> Option<T> {
-        if self.contains(v) {
-            self.remove(v);
-            Some(v)
-        } else {
-            None
+    pub fn take(&mut self, v: &T) -> Option<T> {
+        let v = *v;
+        unsafe {
+            // these explicit bounds checks make sure that contains and remove
+            // cannot panic
+            if v >= self.lower_cast && v <= self.upper_cast && self.contains_unsafe(v) {
+                self.remove_unsafe(v);
+                Some(v)
+            } else {
+                None
+            }
         }
     }
 
@@ -397,7 +448,10 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> BitSet<LOWER, UPPER, T>
     /// ```
     pub fn is_subset(&self, other: &Self) -> bool {
         if self.len() <= other.len() {
-            self.iter().all(|v| other.contains(v))
+            // SAFETY: since self and other have the exact same type, any value
+            // in self HAS to be containable by other. thus, we can skip the
+            // bounds checks.
+            unsafe { self.iter().all(|v| other.contains_unsafe(v)) }
         } else {
             false
         }
@@ -707,10 +761,10 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Sub for &BitSet<LOWER, 
     /// assert_eq!(bar.len(), 2);
     /// assert_eq!(baz.len(), 2);
     ///
-    /// assert_eq!(baz.contains(2), true);
-    /// assert_eq!(baz.contains(3), false);
-    /// assert_eq!(baz.contains(4), false);
-    /// assert_eq!(baz.contains(5), true);
+    /// assert_eq!(baz.contains(&2), true);
+    /// assert_eq!(baz.contains(&3), false);
+    /// assert_eq!(baz.contains(&4), false);
+    /// assert_eq!(baz.contains(&5), true);
     /// ```
     fn sub(self, rhs: &BitSet<LOWER, UPPER, T>) -> Self::Output {
         self.difference(rhs).collect()
@@ -753,10 +807,13 @@ fn generic_next_binop<
     op: F,
 ) -> Option<T> {
     while *index <= UPPER {
-        let v = NumCast::from(*index).unwrap();
+        let v: T = NumCast::from(*index).unwrap();
         *index += 1;
-        if op(lhs.contains(v), rhs.contains(v)) {
-            return Some(v);
+        unsafe {
+            // SAFETY: the while loop protects us against out-of-bounds errors
+            if op(lhs.contains_unsafe(v), rhs.contains_unsafe(v)) {
+                return Some(v);
+            }
         }
     }
     None
@@ -894,10 +951,13 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for Iter<'_, L
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {
-            let v = NumCast::from(self.index).unwrap();
+            let v: T = NumCast::from(self.index).unwrap();
             self.index += 1;
-            if self.collection.contains(v) {
-                return Some(v);
+            unsafe {
+                // SAFETY: the while loop protects against out-of-bounds errors
+                if self.collection.contains_unsafe(v) {
+                    return Some(v);
+                }
             }
         }
         None
@@ -929,11 +989,14 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for Drain<'_, 
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {
-            let v = NumCast::from(self.index).unwrap();
+            let v: T = NumCast::from(self.index).unwrap();
             self.index += 1;
-            if self.collection.contains(v) {
-                self.collection.remove(v);
-                return Some(v);
+            unsafe {
+                // SAFETY: the while loop protects against out-of-bounds errors
+                if self.collection.contains_unsafe(v) {
+                    self.collection.remove_unsafe(v);
+                    return Some(v);
+                }
             }
         }
         None
@@ -964,11 +1027,14 @@ impl<const LOWER: usize, const UPPER: usize, T: Integer> Iterator for IntoIter<L
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index <= UPPER {
-            let v = NumCast::from(self.index).unwrap();
+            let v: T = NumCast::from(self.index).unwrap();
             self.index += 1;
-            if self.collection.contains(v) {
-                self.collection.remove(v);
-                return Some(v);
+            unsafe {
+                // SAFETY: the while loop protects against out-of-bounds errors
+                if self.collection.contains_unsafe(v) {
+                    self.collection.remove_unsafe(v);
+                    return Some(v);
+                }
             }
         }
         None
