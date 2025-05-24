@@ -1,4 +1,4 @@
-use std::{iter::FusedIterator, ops::Index};
+use std::{fmt::Debug, iter::FusedIterator, ops::Index};
 
 use num_traits::NumCast;
 
@@ -17,13 +17,34 @@ use crate::Integer;
 /// implemented for `u8`, `u16`, `u32`, and `usize`. I specifically left out
 /// out `u64`, because on a 32bit machine `usize` would be 32bit, and casting
 /// from a `u64` to `usize` would truncate.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VecMap<const LOWER: usize, const UPPER: usize, K: Integer, V> {
     data: Vec<Option<V>>,
     len: usize,
     lower_cast: K,
     upper_cast: K,
+}
+
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Debug> Debug
+    for VecMap<LOWER, UPPER, K, V>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_set().entries(self.iter()).finish()
+    }
+}
+
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Clone
+    for VecMap<LOWER, UPPER, K, V>
+{
+    fn clone(&self) -> Self {
+        Self {
+            data: self.data.clone(),
+            len: self.len,
+            lower_cast: self.lower_cast,
+            upper_cast: self.upper_cast,
+        }
+    }
 }
 
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Default
@@ -90,6 +111,30 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
         Self::default()
     }
 
+    /// Removes all items from map.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
+    /// foo.insert(1, 11.1);
+    /// foo.insert(10, 22.2);
+    /// foo.insert(5, 33.3);
+    ///
+    /// assert_eq!(foo.len(), 3);
+    /// assert!(!foo.is_empty());
+    ///
+    /// foo.clear();
+    /// assert_eq!(foo.len(), 0);
+    /// assert!(foo.is_empty());
+    /// ```
+    pub fn clear(&mut self) {
+        self.data.fill(None);
+        self.len = 0;
+    }
+}
+
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V> VecMap<LOWER, UPPER, K, V> {
     /// Returns the number of elements in the map.
     ///
     /// ```
@@ -125,28 +170,6 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> VecMap<LOWER,
     /// ```
     pub fn is_empty(&self) -> bool {
         self.len == 0
-    }
-
-    /// Removes all items from map.
-    ///
-    /// ```
-    /// use firims::VecMap;
-    ///
-    /// let mut foo = VecMap::<0, 32, usize, f32>::new();
-    /// foo.insert(1, 11.1);
-    /// foo.insert(10, 22.2);
-    /// foo.insert(5, 33.3);
-    ///
-    /// assert_eq!(foo.len(), 3);
-    /// assert!(!foo.is_empty());
-    ///
-    /// foo.clear();
-    /// assert_eq!(foo.len(), 0);
-    /// assert!(foo.is_empty());
-    /// ```
-    pub fn clear(&mut self) {
-        self.data.fill(None);
-        self.len = 0;
     }
 
     /// Returns the array index for an element x.
