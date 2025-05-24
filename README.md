@@ -5,13 +5,14 @@ FIxed Range Integer Maps and Sets
 ## General
 
 This crate implements a map ([VecMap]) and set ([BitSet]) for unsigned integer keys
-of a known range. For example, if you need a map with integer keys, and you know
-those keys can only ever be numbers between 10 and 200.
+of a known range. For example, these structures are useful whenever you need a
+map with integer keys, and you know those keys can only ever be numbers ranging
+between 10 and 200.
 
-While this is a major limitation, whenever you can set constraints like this you
-unlock a lot of performance gains, because you don't need to hash numbers.
-Instead, in case of the bitset, you just track booleans (or in this case bits)
-telling you whether the number is in the set or not.
+While this is a major limitation, because you can no longer use arbitrary keys,
+constraints like this you unlock a lot of performance gains, because you don't
+need to hash numbers. Instead, in case of the bitset, you just track booleans
+(or in this case bits) telling you whether the number is in the set or not.
 
 The implementation for this type of data structure is fairly simple, so you
 should be able to easily adapt this implementation to suit your own needs; just
@@ -29,14 +30,25 @@ implementations. The former is just a `Vec<V>`, where `V` is your value type,
 and it maps keys to indexes in the `Vec` through a simple addition. As
 simple as that may be, the benefit of the [VecMap] is that it implements most of
 the of the same interface of the [std::collections::HashMap], making
-this a good drop-in replacement for most use cases (given that the
-[VecMap] constraints fir you use case).
+this an almost drop-in replacement for most use cases (given that the
+[VecMap] constraints fit your use case).
 
 The [BitSet] is, well, a bit set. Each key is mapped to a bit in an element in a
 `Vec<u64>`, and a value being present just means that the bit is set to 1.
 Again, very simple implementation, pretty easy to replicate, but it implements
 the majority of the [std::collections::HashSet] interface in order to make the
 bitset a drop-in replacement.
+
+## Interface differences to HashMap and HashSet
+
+[VecMap] and [BitSet] are almost drop-in replacements for
+[std::collections::HashMap] and [std::collections::HashSet]... almost. Most
+importantly, some iterators return slightly different types than you might
+otherwise expect. The most important examples are any iterators in the [VecMap]
+that you would expect to return a reference to the key values. Due to the
+underlying implementation of the [VecMap], no such references actually exist,
+because the keys are actually calculated on the fly, and thus those iterators
+return copies of those keys.
 
 ## Feature flags
 
@@ -59,15 +71,15 @@ crate, and the [VecMap] with an `IntMap`. The benchmarks have been run on two
 different machines: An M2 macbook pro, as well as an `x86_64-linux` machine
 using a Ryzen 7 9800x3D CPU.
 
-In general, the [BitSet]s beats the `IntSet` in all those benchmarks, but note
-note that the `IntSet` is also way more flexible then the these data structures,
-allowing you to insert any sort of integer at any time. The range constraint
-on the values / keys is what unlocks those performance gains, but obviously
-it does not fit any use case.
+In general, the data structures in this crate beat the their competitors in all
+those benchmarks, but note note that, for example, the `IntSet` is also way
+more flexible then the these data structures, allowing you to insert any sort
+of integer at any time. The range constraint on the values / keys is what
+unlocks those performance gains, but obviously it does not fit any use case.
 
 Also note that the benchmark results are very different between the M2 and the
-x86 architecture, with the latter producing a way larger gap between the
-`IntSet` and the [BitSet]s.
+x86 architecture, with the latter producing a way larger gap between, for
+example, the `IntSet` and the [BitSet]s.
 
 ### M2
 
