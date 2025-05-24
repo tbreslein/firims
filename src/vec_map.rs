@@ -931,6 +931,38 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoIterator
     }
 }
 
+impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V> IntoIterator
+    for &'a VecMap<LOWER, UPPER, K, V>
+{
+    type Item = (K, &'a V);
+    type IntoIter = Iter<'a, LOWER, UPPER, K, V>;
+
+    /// An iterator consuming a [VecMap] reference, vising all key-value pairs
+    /// in order of ascending keys.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let foo = {
+    ///     let mut foo = VecMap::<0, 32, usize, f32>::new();
+    ///     foo.insert(0, 11.1);
+    ///     foo.insert(32, 33.3);
+    ///     foo.insert(10, 22.2);
+    ///     foo
+    /// };
+    /// let bar = &foo;
+    ///
+    /// let mut iter = bar.into_iter();
+    /// assert_eq!(iter.next(), Some((0, &11.1)));
+    /// assert_eq!(iter.next(), Some((10, &22.2)));
+    /// assert_eq!(iter.next(), Some((32, &33.3)));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        Iter::new(self)
+    }
+}
+
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Index<&K>
     for VecMap<LOWER, UPPER, K, V>
 {
