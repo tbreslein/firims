@@ -1002,6 +1002,14 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone, const N: usiz
     ///
     /// If any entries in the array have equal keys, all but one of the
     /// corresponding values will be dropped.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let map1 = VecMap::<0, 32, usize, i32>::from([(1, 2), (3, 4)]);
+    /// let map2: VecMap::<0, 32, usize, i32> = [(1, 2), (3, 4)].into();
+    /// assert_eq!(map1, map2);
+    /// ```
     fn from(value: [(K, V); N]) -> Self {
         let mut map = Self::new();
         for (k, v) in value {
