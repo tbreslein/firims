@@ -1019,12 +1019,126 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone, const N: usiz
     }
 }
 
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> FromIterator<(K, V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    /// Construct a [VecMap<LOWER, UPPER, K, V>] from an iterator of `(K, V)`s.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let v = vec![(1, 11.1), (2, 22.2), (3, 33.3)];
+    /// let mut a = VecMap::<1, 6, usize, f32>::from_iter(v.into_iter());
+    ///
+    /// assert_eq!(a.len(), 3);
+    /// assert_eq!(a, [(1, 11.1), (2, 22.2), (3, 33.3)].into_iter().collect());
+    /// ```
+    fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
+        let mut s = Self::new();
+        s.extend(iter);
+        s
+    }
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> FromIterator<&'a (K, V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    /// Construct a [VecMap<LOWER, UPPER, K, V>] from an iterator of `&'a (K, V)`s.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let v = vec![(1, 11.1), (2, 22.2), (3, 33.3)];
+    /// let mut a = VecMap::<1, 6, usize, f32>::from_iter(v.into_iter());
+    ///
+    /// assert_eq!(a.len(), 3);
+    /// assert_eq!(a, [(1, 11.1), (2, 22.2), (3, 33.3)].into_iter().collect());
+    /// ```
+    fn from_iter<I: IntoIterator<Item = &'a (K, V)>>(iter: I) -> Self {
+        let mut s = Self::new();
+        s.extend(iter);
+        s
+    }
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> FromIterator<(&'a K, &'a V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    /// Construct a [VecMap<LOWER, UPPER, K, V>] from an iterator of `(&'a K, &'a V)`s.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let v = vec![(1, 11.1), (2, 22.2), (3, 33.3)];
+    /// let a = VecMap::<1, 6, usize, f32>::from_iter(v.iter());
+    ///
+    /// assert_eq!(a.len(), 3);
+    /// assert_eq!(a, [(1, 11.1), (2, 22.2), (3, 33.3)].into_iter().collect());
+    /// ```
+    fn from_iter<I: IntoIterator<Item = (&'a K, &'a V)>>(iter: I) -> Self {
+        let mut s = Self::new();
+        s.extend(iter);
+        s
+    }
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> FromIterator<(&'a K, V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    /// Construct a [VecMap<LOWER, UPPER, K, V>] from an iterator of `(&'a K, V)`s.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let v = vec![(1, 11.1), (2, 22.2), (3, 33.3)];
+    /// let a = VecMap::<1, 6, usize, f32>::from_iter(v.iter());
+    ///
+    /// assert_eq!(a.len(), 3);
+    /// assert_eq!(a, [(1, 11.1), (2, 22.2), (3, 33.3)].into_iter().collect());
+    /// ```
+    fn from_iter<I: IntoIterator<Item = (&'a K, V)>>(iter: I) -> Self {
+        let mut s = Self::new();
+        s.extend(iter);
+        s
+    }
+}
+
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Extend<(K, V)>
     for VecMap<LOWER, UPPER, K, V>
 {
     fn extend<T: IntoIterator<Item = (K, V)>>(&mut self, iter: T) {
         for (k, v) in iter {
             self.insert(k, v);
+        }
+    }
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Extend<&'a (K, V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    fn extend<T: IntoIterator<Item = &'a (K, V)>>(&mut self, iter: T) {
+        for (k, v) in iter {
+            self.insert(*k, v.clone());
+        }
+    }
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Extend<(&'a K, &'a V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    fn extend<T: IntoIterator<Item = (&'a K, &'a V)>>(&mut self, iter: T) {
+        for (k, v) in iter {
+            self.insert(*k, v.clone());
+        }
+    }
+}
+
+impl<'a, const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Extend<(&'a K, V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    fn extend<T: IntoIterator<Item = (&'a K, V)>>(&mut self, iter: T) {
+        for (k, v) in iter {
+            self.insert(*k, v.clone());
         }
     }
 }
