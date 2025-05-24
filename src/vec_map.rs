@@ -1019,6 +1019,16 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone, const N: usiz
     }
 }
 
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Extend<(K, V)>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    fn extend<T: IntoIterator<Item = (K, V)>>(&mut self, iter: T) {
+        for (k, v) in iter {
+            self.insert(k, v);
+        }
+    }
+}
+
 impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Index<&K>
     for VecMap<LOWER, UPPER, K, V>
 {
