@@ -447,20 +447,31 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> VecMap<LOWER, UPPER,
     ///
     /// In other words, remove all pairs (k, v) for which f(&k, &mut v) returns
     /// false. The elements are visited in order of ascending keys.
+    ///
+    /// ```
+    /// use firims::VecMap;
+    ///
+    /// let mut foo = VecMap::<0, 16, usize, f32>::from(
+    ///     [(0, 11.1), (3, 33.3), (6, 67.6), (10, 202.0)]
+    /// );
+    ///
+    /// // in other words: remove pairs where k is odd or where v > 100
+    /// foo.retain(|k, v| k % 2 == 0 && *v <= 100.0);
+    /// assert!(!foo.is_empty());
+    /// assert_eq!(foo, [(0, 11.1), (6, 67.6)].into_iter().collect());
+    /// ```
     pub fn retain<F>(&mut self, f: F)
     where
         F: Fn(&K, &mut V) -> bool,
     {
-        for i in 0..self.len() {
+        for i in 0..self.data.len() {
             unsafe {
                 // SAFETY: the for loop protects against out-of-bounds
-                if self.data.get_unchecked(i).is_some()
-                    && f(
-                        &NumCast::from(i + LOWER).unwrap(),
-                        self.data.get_unchecked_mut(i).as_mut().unwrap(),
-                    )
-                {
-                    self.data[i] = None;
+                if let Some(v) = self.data.get_unchecked_mut(i) {
+                    if !f(&NumCast::from(i + LOWER).unwrap(), v) {
+                        self.data.get_unchecked_mut(i).take();
+                        self.len -= 1;
+                    }
                 }
             }
         }
