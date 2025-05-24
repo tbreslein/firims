@@ -1,4 +1,4 @@
-use std::iter::FusedIterator;
+use std::{iter::FusedIterator, ops::Index};
 
 use num_traits::NumCast;
 
@@ -928,5 +928,28 @@ impl<const LOWER: usize, const UPPER: usize, K: Integer, V> IntoIterator
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter::new(self)
+    }
+}
+
+impl<const LOWER: usize, const UPPER: usize, K: Integer, V: Clone> Index<&K>
+    for VecMap<LOWER, UPPER, K, V>
+{
+    type Output = V;
+
+    /// Returns a reference to the value corresponding to the supplied key.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the key is not present in the [VecMap].
+    fn index(&self, index: &K) -> &Self::Output {
+        if self.contains_key(index) {
+            unsafe { self.get_unchecked(*index).unwrap_unchecked() }
+        } else {
+            panic!(
+                "Out of bounds: Tried indexing into firims::VecMap with index \
+                {:?}, but it is not a valid key in this map.",
+                *index
+            );
+        }
     }
 }
